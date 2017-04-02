@@ -1,0 +1,301 @@
+#!/usr/bin/env php
+<?php
+
+namespace mermshaus\xfine\generate;
+
+use DateTime;
+use DateTimeZone;
+use Exception;
+use FilterIterator;
+use Iterator;
+use mermshaus\fine\Application;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+
+require __DIR__ . '/src/Application.php';
+
+/**
+ *
+ */
+class FileExtensionFilterIterator extends FilterIterator
+{
+    /**
+     *
+     * @var array
+     */
+    private $extensionList = array();
+
+    /**
+     *
+     * @param Iterator $innerIterator
+     * @param array $extensionList
+     */
+    public function __construct(Iterator $innerIterator, array $extensionList)
+    {
+        parent::__construct($innerIterator);
+
+        foreach ($extensionList as $extension) {
+            $this->extensionList[strtolower($extension)] = true;
+        }
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function accept()
+    {
+        $extension = strtolower($this->current()->getExtension());
+
+        return (isset($this->extensionList[$extension]));
+    }
+}
+
+/**
+ *
+ */
+class Generator
+{
+    /**
+     *
+     * @param string $path
+     * @return array
+     */
+    public function getSortedFiles($path, array $extensionList)
+    {
+        $rdi = new RecursiveDirectoryIterator(
+            $path,
+            RecursiveDirectoryIterator::SKIP_DOTS
+        );
+
+        $rii = new RecursiveIteratorIterator(
+            $rdi,
+            RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        $fii = new FileExtensionFilterIterator($rii, $extensionList);
+
+        $files = iterator_to_array($fii);
+
+        usort($files, function (SplFileInfo $a, SplFileInfo $b) {
+            $da = dirname($a->getRealPath());
+            $db = dirname($b->getRealPath());
+
+            if ($da < $db) {
+                return -1;
+            }
+
+            if ($da > $db) {
+                return 1;
+            }
+
+            if ($a->getRealPath() < $b->getRealPath()) {
+                return -1;
+            }
+
+            if ($a->getRealPath() > $b->getRealPath()) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return $files;
+    }
+
+    /**
+     *
+     * @param string $file
+     * @return string
+     * @throws Exception
+     */
+    public function appendSourceFile($file)
+    {
+        $data = file_get_contents($file);
+
+        if (substr($data, 0, 5) !== '<?php') {
+            throw new Exception();
+        }
+
+        $data = substr($data, 5);
+
+        return trim($data);
+    }
+
+    /**
+     *
+     * @param string $file
+     * @param string $baseDir
+     * @return string
+     */
+    public function appendViewFile($file, $baseDir)
+    {
+        $data = file_get_contents($file);
+
+        $key = substr(dirname($file), strlen($baseDir . '/'));
+
+        if (!is_string($key)) {
+            $key = '';
+        }
+
+        if ($key !== '') {
+            $key .= '/';
+        }
+
+        $key .= basename($file, '.phtml');
+
+        $tpl = <<<'TPL'
+$viewScriptManager->addScript('%s', function () {
+?>%s<?php
+});
+
+
+TPL;
+
+        return sprintf($tpl, $key, $data);
+    }
+
+    private function operation_minify($input, $type)
+    {
+        if (trim(`which yui-compressor`) === '') {
+            fwrite(STDERR, "yui-compressor not found. Skipping minify operation\n");
+            return $input;
+        }
+
+        if ($type === 'application/javascript') {
+            $type = 'js';
+        } else {
+            $type = 'css';
+        }
+
+        $cmd = 'echo ' . escapeshellarg($input) . ' | yui-compressor --type ' . escapeshellcmd($type);
+
+        return `$cmd`;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getAssetData()
+    {
+        $files = array(
+            'jquery-1.12.4.min.js' => array(
+                'type' => 'application/javascript',
+                'path' => __DIR__ . '/assets/jquery-1.12.4.min.js',
+                'operations' => array()
+            ),
+            'fine.js' => array(
+                'type' => 'application/javascript',
+                'path' => __DIR__ . '/assets/fine.js',
+                'operations' => array('minify')
+            ),
+            'fine.css' => array(
+                'type' => 'text/css',
+                'path' => __DIR__ . '/assets/fine.css',
+                'operations' => array('minify')
+            )
+        );
+
+        $data = array();
+
+        foreach ($files as $key => $file) {
+            $content = file_get_contents($file['path']);
+
+            foreach ($file['operations'] as $op) {
+                if ($op === 'minify') {
+                    $content = $this->operation_minify($content, $file['type']);
+                }
+            }
+
+            $data[$key] = array(
+                'type'    => $file['type'],
+                'content' => $content
+            );
+        }
+
+        return json_encode($data, JSON_HEX_TAG /*| JSON_PRETTY_PRINT*/);
+    }
+}
+
+
+
+$generator = new Generator();
+
+$dt = new DateTime('now', new DateTimeZone('UTC'));
+
+$output = sprintf(<<<'EOT'
+<?php
+/**
+ * Fine Image Gallery
+ *
+ * This file was automatically generated and should not be edited.
+ *
+ * Version:      %s
+ * Generated at: %s
+ *
+ * License: MIT <https://opensource.org/licenses/MIT>
+ *
+ * Copyright %s Marc Ermshaus <http://www.ermshaus.org>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+
+
+EOT
+, Application::VERSION,
+$dt->format('Y-m-d H:i:s \\U\\T\\C'),
+$dt->format('Y'));
+
+foreach ($generator->getSortedFiles(__DIR__ . '/src', array('php')) as $file) {
+    $output .= $generator->appendSourceFile($file);
+    $output .= "\n\n";
+}
+
+$output .= <<<'EOT'
+namespace mermshaus\fine;
+
+$configPath = (file_exists(__DIR__ . '/fine.json')) ? __DIR__ . '/fine.json' : null;
+
+$viewScriptManager = new ViewScriptManager();
+
+
+EOT;
+
+foreach ($generator->getSortedFiles(__DIR__ . '/views', array('phtml')) as $file) {
+    $output .= $generator->appendViewFile($file, __DIR__ . '/views');
+}
+
+$output .= <<<'EOT'
+#$GLOBALS['loadCalls'] = 0;
+
+(new Application(new Config($configPath), $viewScriptManager))->run();
+
+#if ($GLOBALS['loadCalls'] > 0) {
+#    echo '<div id="debug">Image::load() calls: ' . $GLOBALS['loadCalls'] . '</div>';
+#}
+
+__halt_compiler();
+
+EOT;
+
+$output .= $generator->getAssetData() . "\n";
+
+echo $output;

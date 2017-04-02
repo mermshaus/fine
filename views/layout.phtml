@@ -1,0 +1,48 @@
+<?php
+
+if ($this->html_id === null) {
+    $this->html_id = '';
+}
+
+$versionString = $this->appVersion . '-' . filemtime(__FILE__);
+
+$scripts = array(
+    'jquery-1.12.4.min.js',
+    'fine.js'
+);
+
+$scriptsHtml = '';
+
+foreach ($scripts as $script) {
+    $scriptsHtml .= sprintf('<script src="%s" defer></script>',
+        $this->e($this->url('asset', array('file' => $script, 'v' => $versionString)))
+    );
+}
+
+$stylesHtml = sprintf('<link href="%s" rel="stylesheet">',
+    $this->e($this->url('asset', array('file' => 'fine.css', 'v' => $versionString)))
+);
+
+?><!DOCTYPE html>
+<html lang="en"<?=($this->html_id !== '') ? ' id="' . $this->e($this->html_id) . '"' : '';?>>
+<head>
+    <meta charset="utf-8">
+    <title>Fine Image Gallery</title>
+    <meta name="description" content="A gallery of fine images.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?=$scriptsHtml?>
+    <?=$stylesHtml?>
+</head>
+<body>
+    <?php $this->contentView->output(); ?>
+
+    <?php if ($this->html_id === 'page-index' || $this->html_id === 'page-album'): ?>
+        <div id="fine-logo">
+            <p>
+                <span class="fine-logo-title">ﬁne image gallery</span><br>
+                <span class="fine-logo-version">v<?=$this->e($this->appVersion)?></span>
+            </p>
+        </div>
+    <?php endif; ?>
+</body>
+</html>

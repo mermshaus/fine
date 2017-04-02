@@ -1,0 +1,293 @@
+/* Common */
+
+.cf:before,
+.cf:after {
+    content: " ";
+    display: table;
+}
+.cf:after {
+    clear: both;
+}
+.cf {
+    *zoom: 1;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+}
+body {
+    font-family: Arial, Verdana, sans-serif;
+    font-size: 13px;
+}
+a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: none;
+}
+a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.ui-controls, .ui-content {
+    overflow: auto;
+}
+
+.ui-controls {
+    padding: 5px;
+}
+
+.ui-controls a {
+    padding: 5px 8px;
+    display: inline-block;
+}
+
+.fig-info {
+    border: 1px solid skyblue;
+    font-size: small;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 2px;
+}
+
+
+
+/* page-index */
+
+#page-index ul,
+#page-index li {
+    margin: 0;
+    padding: 0;
+}
+
+#page-index ul {
+    list-style: none;
+}
+
+#page-index ul li {
+    float: left;
+    width: 180px;
+}
+
+#page-index ul li a {
+    display: block;
+    border: 1px solid black;
+    overflow: hidden;
+    position: relative;
+}
+
+#page-index ul li a img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#page-index ul li a span {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 5px;
+    /*min-height: 40px;*/
+    font-weight: normal;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+
+
+/* page-album */
+
+#page-album .ui-content ul,
+#page-album .ui-content li {
+    margin: 0;
+    padding: 0;
+}
+
+#page-album .ui-content ul {
+    list-style: none;
+}
+
+#page-album .ui-content li {
+    float: left;
+    display: block;
+}
+#page-album .ui-content li .image-container {
+    border: 1px solid transparent;
+}
+
+#page-album .ui-content li a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 0;
+}
+
+#page-album .ui-content li a img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Custom, iPhone Retina */ /* 3 images per row */
+@media only screen and (min-width: 0px), only screen and (min-width: 320px) {
+    #page-album .ui-content li {
+        width: 33.3333%;
+    }
+    #page-album .ui-content li:nth-child(3n + 2) {
+        width: 33.3334%;
+    }
+    #page-album .ui-content li:nth-child(3n + 4) {
+        clear: left;
+    }
+}
+
+/* Extra Small Devices, Phones */ /* 5 images per row */
+@media only screen and (min-width: 480px) {
+    #page-album .ui-content li,
+    #page-album .ui-content li:nth-child(3n + 2) {
+        width: 20%;
+    }
+    #page-album .ui-content li:nth-child(3n + 4) {
+        clear: none;
+    }
+    #page-album .ui-content li:nth-child(5n + 6) {
+        clear: left;
+    }
+}
+
+/* Small Devices, Tablets */ /* 7 images per row */
+@media only screen and (min-width: 768px) {
+    #page-album .ui-content li,
+    #page-album .ui-content li:nth-child(3n + 2) {
+        width: 14.2857%;
+    }
+    #page-album .ui-content li:nth-child(7n + 4) {
+        width: 14.2858%;
+    }
+    #page-album .ui-content li:nth-child(3n + 4),
+    #page-album .ui-content li:nth-child(5n + 6) {
+        clear: none;
+    }
+    #page-album .ui-content li:nth-child(7n + 8) {
+        clear: left;
+    }
+}
+
+/* Medium Devices, Desktops */ /* 9 images per row */
+@media only screen and (min-width: 992px) {
+    #page-album .ui-content li,
+    #page-album .ui-content li:nth-child(3n + 2),
+    #page-album .ui-content li:nth-child(7n + 4) {
+        width: 11.1111%;
+    }
+    #page-album .ui-content li:nth-child(9n + 5) {
+        width: 11.1112%;
+    }
+    #page-album .ui-content li:nth-child(3n + 4),
+    #page-album .ui-content li:nth-child(5n + 6),
+    #page-album .ui-content li:nth-child(7n + 8) {
+        clear: none;
+    }
+    #page-album .ui-content li:nth-child(9n + 10) {
+        clear: left;
+    }
+}
+
+/* Large Devices, Wide Screens */ /* 10 images per row */
+@media only screen and (min-width: 1200px) {
+    #page-album .ui-content li,
+    #page-album .ui-content li:nth-child(3n + 2),
+    #page-album .ui-content li:nth-child(7n + 4),
+    #page-album .ui-content li:nth-child(9n + 5) {
+        width: 10%;
+    }
+    #page-album .ui-content li:nth-child(3n + 4),
+    #page-album .ui-content li:nth-child(5n + 6),
+    #page-album .ui-content li:nth-child(7n + 8),
+    #page-album .ui-content li:nth-child(9n + 10) {
+        clear: none;
+    }
+    #page-album .ui-content li:nth-child(10n + 11) {
+        clear: left;
+    }
+}
+
+#page-album .ui-content li img {
+    display: block;
+}
+
+
+
+/* page-detail */
+
+#page-detail body {
+    display: table;
+}
+
+#page-detail .ui-controls-wrapper {
+    display: table-row;
+}
+
+#page-detail div.detail-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display:table-row;
+}
+
+#page-detail img.detail-image {
+    max-width: 100%;
+    max-height: 100%;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin: auto;
+}
+
+
+
+#debug {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    right: 50%;
+    width: 150px;
+    margin-left: -75px;
+    background: darkred;
+}
+
+
+
+#fine-logo {
+    overflow: auto;
+}
+
+#fine-logo p {
+    clear: both;
+    padding-top: 50px;
+    text-align: center;
+    font-size: small;
+}
+
+#fine-logo .fine-logo-title {
+    font-family: Georgia, serif;
+    font-style: italic;
+}
+
+#fine-logo .fine-logo-version {
+    font-size: 9px;
+}
+
+
+
+#navigation-random {
+    display: none;
+}

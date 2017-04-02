@@ -1,0 +1,118 @@
+<?php
+
+namespace mermshaus\fine;
+
+/**
+ *
+ */
+class ImageTools
+{
+    /**
+     *
+     * @param string $imagePath
+     * @return resource
+     * @throws Exception
+     */
+    private function loadImage($imagePath)
+    {
+        $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
+
+        $image = null;
+
+        if (in_array($extension, array('jpg', 'jpeg'))) {
+            $image = imagecreatefromjpeg($imagePath);
+        } elseif (in_array($extension, array('png'))) {
+            $image = imagecreatefrompng($imagePath);
+        } elseif (in_array($extension, array('gif'))) {
+            $image = imagecreatefromgif($imagePath);
+        }
+
+        if (!is_resource($image)) {
+            throw new Exception(sprintf('Couldn\'t open image in "%s"', $imagePath));
+        }
+
+        return $image;
+    }
+
+    /**
+     *
+     * @param string $imagePath
+     * @param int $width
+     * @param int $height
+     * @return resource
+     */
+    public function createThumb($imagePath, $width, $height)
+    {
+        $image = $this->loadImage($imagePath);
+
+        $imageWidth  = imagesx($image);
+        $imageHeight = imagesy($image);
+
+        $boxWidth  = $width;
+        $boxHeight = $height;
+
+        $sfw = $imageWidth / $boxWidth;
+        $sfh = $imageHeight / $boxHeight;
+
+        if ($sfw < $sfh) {
+            $tmpBoxWidth  = $boxWidth * $sfw;
+            $tmpBoxHeight = $boxHeight * $sfw;
+        } else {
+            $tmpBoxWidth  = $boxWidth * $sfh;
+            $tmpBoxHeight = $boxHeight * $sfh;
+        }
+
+        $dstim = imagecreatetruecolor($tmpBoxWidth, $tmpBoxHeight);
+
+        if ($sfw < $sfh) {
+            imagecopy($dstim, $image, 0, 0, 0, ($imageHeight - $tmpBoxHeight) / 2, $tmpBoxWidth, $tmpBoxHeight);
+        } else {
+            imagecopy($dstim, $image, 0, 0, ($imageWidth - $tmpBoxWidth) / 2, 0, $tmpBoxWidth, $tmpBoxHeight);
+        }
+
+        $dstim2 = imagecreatetruecolor($boxWidth, $boxHeight);
+
+        imagecopyresampled($dstim2, $dstim, 0, 0, 0, 0, $boxWidth, $boxHeight, $tmpBoxWidth, $tmpBoxHeight);
+
+        return $dstim2;
+    }
+
+    /**
+     *
+     * @param string $imagePath
+     * @param int $maxWidth
+     * @param int $maxHeight
+     * @return resource
+     * @throws Exception
+     */
+    public function scale($imagePath, $maxWidth, $maxHeight, $enlarge = false)
+    {
+        $image = $this->loadImage($imagePath);
+
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
+
+        if ($enlarge === false && $imageWidth <= $maxWidth && $imageHeight <= $maxHeight) {
+            return $image;
+        }
+
+        $f = max($imageWidth / $maxWidth, $imageHeight / $maxHeight);
+
+        $tmpBoxWidth  = (int) round($imageWidth / $f);
+        $tmpBoxHeight = (int) round($imageHeight / $f);
+
+        if ($tmpBoxWidth > $maxWidth) {
+            $tmpBoxWidth = $maxWidth;
+        }
+
+        if ($tmpBoxHeight > $maxHeight) {
+            $tmpBoxHeight = $maxHeight;
+        }
+
+        $dstim2 = imagecreatetruecolor($tmpBoxWidth, $tmpBoxHeight);
+
+        imagecopyresampled($dstim2, $image, 0, 0, 0, 0, $tmpBoxWidth, $tmpBoxHeight, $imageWidth, $imageHeight);
+
+        return $dstim2;
+    }
+}
