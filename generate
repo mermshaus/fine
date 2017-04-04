@@ -273,6 +273,7 @@ $output .= <<<'EOT'
 namespace mermshaus\fine;
 
 $configPath = (file_exists(__DIR__ . '/fine.json')) ? __DIR__ . '/fine.json' : null;
+$config = new Config($configPath);
 
 $viewScriptManager = new ViewScriptManager();
 
@@ -284,9 +285,11 @@ foreach ($generator->getSortedFiles(__DIR__ . '/views', array('phtml')) as $file
 }
 
 $output .= <<<'EOT'
+$cache = new FileCache($config->cacheDir);
+
 #$GLOBALS['loadCalls'] = 0;
 
-(new Application(new Config($configPath), $viewScriptManager))->run();
+(new Application($config, $viewScriptManager, $cache))->run();
 
 #if ($GLOBALS['loadCalls'] > 0) {
 #    echo '<div id="debug">Image::load() calls: ' . $GLOBALS['loadCalls'] . '</div>';

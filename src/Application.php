@@ -15,7 +15,7 @@ final class Application
     /**
      * Version number of the application (uses Semantic Versioning)
      */
-    const VERSION = '0.3.0';
+    const VERSION = '0.4.0-dev';
 
     /**
      *
@@ -39,22 +39,18 @@ final class Application
      *
      * @param Config $config
      * @param ViewScriptManager $viewScriptManager
-     * @param FileCache $fileCache
+     * @param FileCache $cache
      */
     public function __construct(
         Config $config,
         ViewScriptManager $viewScriptManager,
-        FileCache $fileCache = null
+        FileCache $cache
     ) {
         $this->config = $config;
 
         $this->viewScriptManager = $viewScriptManager;
 
-        $this->cache = $fileCache;
-
-        if ($this->cache === null) {
-            $this->cache = new FileCache($this->config->cacheDir);
-        }
+        $this->cache = $cache;
 
         set_exception_handler(function (Exception $e) {
             header('HTTP/1.1 404 Not Found');
@@ -135,10 +131,7 @@ final class Application
             throw new Exception(sprintf('File %s is not readable.', basename($file)));
         }
 
-        $obj = new Image($file);
-
-
-        return $obj;
+        return new Image($file);
     }
 
     /**
@@ -238,108 +231,80 @@ final class Application
     /**
      *
      */
-    public function statusAction()
+    public function statusAction() // (no parameters)
     {
-        header('Content-Type: text/plain; charset=UTF-8');
+        $prefixes = array('thumb', 'large');
 
-        $elements = array('thumb', 'large');
+        $ret = '';
 
-        echo 'Cache is writable: ', ($this->canUseCache()) ? 'yes' : '**NO**', "\n\n";
-        echo 'Cache categories: ', implode(', ', $elements) . "\n\n";
+        $ret .= 'Cache is writable: ' . (($this->canUseCache()) ? 'yes' : '**NO**') . "\n\n";
+        $ret .= 'Cache prefixes: ' . implode(', ', $prefixes) . "\n\n";
 
+        // Clear unmanaged items
 
+        $clearedItemsCount = $this->cache->clearUnmanagedItems($prefixes);
 
-        // Delete files we don't know what to do with (old "elements")
+        $ret .= 'Deleted unaccounted files: ' . $clearedItemsCount . "\n\n";
 
-        $aa = 0;
+        // Clear orphaned items
 
-        foreach (glob($this->config->cacheDir . '/*.cache') as $file) {
-            $basename = pathinfo($file, PATHINFO_BASENAME);
+        $albums = ($this->isInSingleAlbumMode()) ? array('') : $this->getAlbums();
 
-            $parts = explode(',', $basename);
+        foreach ($prefixes as $prefix) {
+            $keysHashMap = array();
 
-            if (!in_array($parts[0], $elements, true)) {
-                $aa++;
-                if (pathinfo($file, PATHINFO_EXTENSION) === 'cache') {
-                    unlink($file);
-                }
-            }
-        }
-
-        echo 'Deleted unaccounted files: ' . $aa . "\n\n";
-
-        // ---
-
-
-
-
-        $albums = $this->getAlbums();
-
-        if ($this->isInSingleAlbumMode()) {
-            $albums = array('');
-        }
-
-        foreach ($elements as $element) {
-            $cacheHits = array();
-
-            $ci = 0;
+            $counterImages = 0;
 
             foreach ($albums as $album) {
-                $albumPath = $this->config->albumPath . '/' . $album;
-
-                $images = $this->getImages($albumPath);
+                $images = $this->getImages($this->config->albumPath . '/' . $album);
 
                 foreach ($images as $image) {
                     $width   = 0;
                     $height  = 0;
                     $quality = 0;
 
-                    if ($element === 'thumb') {
+                    if ($prefix === 'thumb') {
                         $width   = $this->config->thumbWidth;
                         $height  = $this->config->thumbHeight;
                         $quality = $this->config->thumbQuality;
-                    } elseif ($element === 'large') {
+                    } elseif ($prefix === 'large') {
                         $width   = $this->config->largeWidth;
                         $height  = $this->config->largeHeight;
                         $quality = $this->config->largeQuality;
                     } else {
-                        throw new Exception();
+                        throw new Exception(sprintf('Unknown prefix "%s" in status action', $prefix));
                     }
 
-                    $filename  = $image->getBasename();
-                    $localPath = $this->config->albumPath . '/' . $album . '/' . $filename;
-                    $cacheId   = $this->generateCacheId($element, $album . '/' . $filename, $localPath, $width, $height, $quality);
-                    $cacheFile = $this->config->cacheDir . '/' . $cacheId;
+                    $cacheKey = $this->generateCacheId(
+                        $prefix,
+                        $album . '/' . $image->getBasename(),
+                        $this->config->albumPath . '/' . $album . '/' . $image->getBasename(),
+                        $width,
+                        $height,
+                        $quality
+                    );
 
-                    if (file_exists($cacheFile)) {
-                        $cacheHits[$cacheId] = true;
+                    if ($this->cache->hasItem($cacheKey)) {
+                        $keysHashMap[$cacheKey] = true;
                     }
 
-                    $ci++;
+                    $counterImages++;
                 }
             }
 
-            $cf = 0;
-            $co = 0;
+            $clearedOrphanedItemsCount = $this->cache->clearItemsNotInList($prefix, $keysHashMap);
 
-            foreach (glob($this->config->cacheDir . '/' . $element . ',*.cache') as $file) {
-                $basename = pathinfo($file, PATHINFO_BASENAME);
-
-                if (!isset($cacheHits[$basename])) {
-                    $co++;
-                    if (pathinfo($file, PATHINFO_EXTENSION) === 'cache') {
-                        unlink($file);
-                    }
-                }
-
-                $cf++;
-            }
-
-            echo $element, "\n";
-            echo "Images found: ", $ci, "\n";
-            echo "Active elements in cache: ", count($cacheHits), "\n";
-            echo "Orphaned elements deleted from cache: ", $co, "\n\n";
+            $ret .= $prefix . "\n";
+            $ret .= "Images found: " . $counterImages . "\n";
+            $ret .= "Active elements in cache: " . count($keysHashMap) . "\n";
+            $ret .= "Orphaned elements deleted from cache: " . $clearedOrphanedItemsCount . "\n\n";
         }
+
+        $view = new View($this, 'status');
+
+        $view->output = $ret;
+
+        return $view;
     }
 
     /**
@@ -589,7 +554,7 @@ final class Application
             return $ret;
         }
 
-        $ret = is_writable($this->config->cacheDir);
+        $ret = $this->cache->isWritable();
 
         return $ret;
     }
@@ -713,13 +678,13 @@ final class Application
         }
 
         if ($element === 'thumb') {
-            $width     = $this->config->thumbWidth;
-            $height    = $this->config->thumbHeight;
-            $quality   = $this->config->thumbQuality;
+            $width   = $this->config->thumbWidth;
+            $height  = $this->config->thumbHeight;
+            $quality = $this->config->thumbQuality;
         } elseif ($element === 'large') {
-            $width     = $this->config->largeWidth;
-            $height    = $this->config->largeHeight;
-            $quality   = $this->config->largeQuality;
+            $width   = $this->config->largeWidth;
+            $height  = $this->config->largeHeight;
+            $quality = $this->config->largeQuality;
         }
 
         $localPath = $this->config->albumPath . '/' . $album . '/' . $filename;

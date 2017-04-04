@@ -70,7 +70,7 @@ final class Image
 
         $this->isLoaded = true;
 
-        $GLOBALS['loadCalls']++;
+        #$GLOBALS['loadCalls']++;
     }
 
     /**
