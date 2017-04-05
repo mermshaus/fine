@@ -118,6 +118,13 @@ Clean up orphaned cache elements:
 - Add link to original or at least zoomable version.
 
 
+## Testing
+
+~~~
+$ phpunit
+~~~
+
+
 ## Credits
 
 - [Marc Ermshaus](http://www.ermshaus.org)

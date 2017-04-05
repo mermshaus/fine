@@ -2,6 +2,8 @@
 
 namespace mermshaus\fine;
 
+use Exception;
+
 /**
  *
  */
@@ -13,7 +15,7 @@ class ImageTools
      * @return resource
      * @throws Exception
      */
-    private function loadImage($imagePath)
+    public function loadImage($imagePath)
     {
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
 
@@ -36,15 +38,13 @@ class ImageTools
 
     /**
      *
-     * @param string $imagePath
+     * @param resource $image
      * @param int $width
      * @param int $height
      * @return resource
      */
-    public function createThumb($imagePath, $width, $height)
+    public function createThumb($image, $width, $height)
     {
-        $image = $this->loadImage($imagePath);
-
         $imageWidth  = imagesx($image);
         $imageHeight = imagesy($image);
 
@@ -79,17 +79,15 @@ class ImageTools
 
     /**
      *
-     * @param string $imagePath
+     * @param resource $image
      * @param int $maxWidth
      * @param int $maxHeight
      * @return resource
      * @throws Exception
      */
-    public function scale($imagePath, $maxWidth, $maxHeight, $enlarge = false)
+    public function scale($image, $maxWidth, $maxHeight, $enlarge = false)
     {
-        $image = $this->loadImage($imagePath);
-
-        $imageWidth = imagesx($image);
+        $imageWidth  = imagesx($image);
         $imageHeight = imagesy($image);
 
         if ($enlarge === false && $imageWidth <= $maxWidth && $imageHeight <= $maxHeight) {

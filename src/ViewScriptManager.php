@@ -3,6 +3,7 @@
 namespace mermshaus\fine;
 
 use Closure;
+use Exception;
 
 /**
  *

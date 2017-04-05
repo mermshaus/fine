@@ -50,8 +50,8 @@ final class Image
                 $this->creationDate = DateTime::createFromFormat(
                     'Y:m:d H:i:s',
                     $exifs['IFD0']['DateTime'],
+                    // @todo Try to determine correct TZ
                     new DateTimeZone('UTC')
-                        // @todo Try to determine correct TZ
                 );
 
                 if ($this->creationDate === false) {

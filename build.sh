@@ -7,7 +7,7 @@ version=`cat src/Application.php | grep "const VERSION" | sed 's/^.*'\''\(.*\)'\
 
 fine_dir="fine-${version}"
 
-build_dir="./build"
+build_dir="./build/release"
 
 
 
@@ -16,11 +16,15 @@ then
     rm -r ${build_dir}
 fi
 
-mkdir ${build_dir}
+mkdir -p ${build_dir}
 
 php -f ./generate > ${build_dir}/index.php
+php -l ${build_dir}/index.php 1>/dev/null
+
+phpunit --no-coverage
 
 cp README.md ${build_dir}
+
 
 
 cd ${build_dir}
@@ -48,4 +52,6 @@ sha256sum --quiet -c ${fine_dir}.zip.sha256sum
 
 rm -r ${fine_dir}
 
-cd ..
+cd ../..
+
+echo "Build successful"

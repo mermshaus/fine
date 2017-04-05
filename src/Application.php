@@ -125,7 +125,7 @@ final class Application
         return $url;
     }
 
-    private function __loadImage($file)
+    private function loadImage($file)
     {
         if (!is_readable($file)) {
             throw new Exception(sprintf('File %s is not readable.', basename($file)));
@@ -147,7 +147,7 @@ final class Application
         $images = array();
 
         foreach ($files as $file) {
-            $images[] = $this->__loadImage($file);
+            $images[] = $this->loadImage($file);
         }
 
         // Sorts by creation date (desc) and filename (asc)
@@ -715,9 +715,9 @@ final class Application
         $imageTools = new ImageTools();
 
         if ($element === 'thumb') {
-            $dstim2 = $imageTools->createThumb($localPath, $width, $height);
+            $dstim2 = $imageTools->createThumb($imageTools->loadImage($localPath), $width, $height);
         } elseif ($element === 'large') {
-            $dstim2 = $imageTools->scale($localPath, $width, $height);
+            $dstim2 = $imageTools->scale($imageTools->loadImage($localPath), $width, $height);
         }
 
         if ($this->cache->saveFromJpegImage($cacheKey, $dstim2, $quality)) {
