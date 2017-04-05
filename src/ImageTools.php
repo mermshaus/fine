@@ -23,6 +23,7 @@ class ImageTools
 
         if (in_array($extension, array('jpg', 'jpeg'))) {
             $image = imagecreatefromjpeg($imagePath);
+            $image = $this->adjustRotation($imagePath, $image);
         } elseif (in_array($extension, array('png'))) {
             $image = imagecreatefrompng($imagePath);
         } elseif (in_array($extension, array('gif'))) {
@@ -31,6 +32,43 @@ class ImageTools
 
         if (!is_resource($image)) {
             throw new Exception(sprintf('Couldn\'t open image in "%s"', $imagePath));
+        }
+
+        return $image;
+    }
+
+    /**
+     *
+     *
+     * Only works for JPEG images (?)
+     *
+     * @param string $imagePath
+     * @param resource $image
+     * @return resource
+     */
+    private function adjustRotation($imagePath, $image)
+    {
+        $exif = @exif_read_data($imagePath);
+
+        if (!is_array($exif) || !isset($exif['Orientation'])) {
+            return $image;
+        }
+
+        switch ($exif['Orientation']) {
+            case 3:
+                $image = imagerotate($image, 180, 0);
+                break;
+
+            case 6:
+                $image = imagerotate($image, -90, 0);
+                break;
+
+            case 8:
+                $image = imagerotate($image, 90, 0);
+                break;
+
+            default:
+                // nop
         }
 
         return $image;

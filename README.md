@@ -110,8 +110,6 @@ Clean up orphaned cache elements:
 
 ## Known issues
 
-- The image algorithms should read orientation info from images and rotate them
-  if necessary.
 - Image meta info (width, height, filesize, …) should be read and cached in
   some way.
 - Page titles should better reflect the current view.
