@@ -81,7 +81,7 @@ final class Application
      *
      * @param string $url
      */
-    public function doRedirect($url)
+    private function doRedirect($url)
     {
         header('Location: ' . $url);
         exit;
@@ -231,7 +231,7 @@ final class Application
     /**
      *
      */
-    public function statusAction() // (no parameters)
+    private function statusAction() // (no parameters)
     {
         $prefixes = array('thumb', 'large');
 
@@ -275,7 +275,7 @@ final class Application
                         throw new Exception(sprintf('Unknown prefix "%s" in status action', $prefix));
                     }
 
-                    $cacheKey = $this->generateCacheId(
+                    $cacheKey = $this->generateCacheKey(
                         $prefix,
                         $album . '/' . $image->getBasename(),
                         $this->config->albumPath . '/' . $album . '/' . $image->getBasename(),
@@ -314,7 +314,7 @@ final class Application
      * @return array
      * @throws Exception
      */
-    public function loadResource($resourceKey)
+    private function loadResource($resourceKey)
     {
         static $jsonStore = null;
 
@@ -639,7 +639,7 @@ final class Application
      * @param int $quality
      * @return string
      */
-    private function generateCacheId($prefix, $path, $localPath, $width, $height, $quality)
+    private function generateCacheKey($prefix, $path, $localPath, $width, $height, $quality)
     {
         $parts = array(
             $prefix,
@@ -650,9 +650,9 @@ final class Application
             $quality
         );
 
-        $cacheId = implode(',', $parts) . '.cache';
+        $cacheKey = implode(',', $parts) . '.cache';
 
-        return $cacheId;
+        return $cacheKey;
     }
 
     /**
@@ -706,7 +706,7 @@ final class Application
         }
 
         $localPath = $this->config->albumPath . '/' . $album . '/' . $basename;
-        $cacheKey  = $this->generateCacheId($prefix, $album . '/' . $basename, $localPath, $width, $height, $quality);
+        $cacheKey  = $this->generateCacheKey($prefix, $album . '/' . $basename, $localPath, $width, $height, $quality);
 
         if ($this->cache->hasItem($cacheKey)) {
             $cacheItem = $this->cache->getItem($cacheKey);

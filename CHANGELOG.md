@@ -14,3 +14,5 @@
 - Display status view within general layout template.
 - Base ETags on modification time of cached files (rather than mtime of
   originals).
+- Change visibility of `Application` methods `doRedirect`, `loadResource`,
+  `statusAction` from public to private.
