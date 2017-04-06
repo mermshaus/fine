@@ -606,29 +606,39 @@ final class Application
 
     /**
      *
-     * @param string $file
-     * @param string $etag
-     * @param string $filename
+     * @param string|null $file
+     * @param string|null $etag
+     * @param string|null $filename
      */
-    private function send($mimeType, $lastModified = '', $etag = '', $filename = '')
+    private function sendImageHeaders($mimeType, $lastModified = null, $etag = null, $filename = null)
     {
         header('Content-Type: ' . $mimeType);
 
-        if ($lastModified !== '') {
+        header('Cache-Control: public, max-age=2592000'); // 30 days
+
+        if ($lastModified !== null && $lastModified !== '') {
             header('Last-Modified: ' . $lastModified);
         }
 
-        if ($filename !== '') {
-            header('Content-Disposition: inline; filename="' . $filename . '"');
+        if ($etag !== null && $etag !== '') {
+            header('ETag: ' . $etag);
         }
 
-        header('Cache-Control: public, max-age=2592000'); // 30 days
-
-        if ($etag !== '') {
-            header('ETag: ' . $etag);
+        if ($filename !== null && $filename !== '') {
+            header('Content-Disposition: inline; filename="' . $filename . '"');
         }
     }
 
+    /**
+     *
+     * @param string $prefix
+     * @param string $path
+     * @param string $localPath
+     * @param int $width
+     * @param int $height
+     * @param int $quality
+     * @return string
+     */
     private function generateCacheId($prefix, $path, $localPath, $width, $height, $quality)
     {
         $parts = array(
@@ -660,6 +670,14 @@ final class Application
         return $default;
     }
 
+    private function generateETag(FileCacheItem $cacheItem)
+    {
+        /* @var $fileObject SplFileObject */
+        $file = $cacheItem->get();
+
+        return $file->getMTime();
+    }
+
     /**
      *
      * @throws Exception
@@ -669,71 +687,75 @@ final class Application
         $album = $this->getGetString('album');
         $this->assertValidAlbum($album);
 
-        $filename = $this->getGetString('filename');
-        $this->assertValidFilename($album, $filename);
+        $basename = $this->getGetString('filename');
+        $this->assertValidFilename($album, $basename);
 
-        $element = $this->getGetString('element');
-        if ($element !== 'thumb' && $element !== 'large') {
+        $prefix = $this->getGetString('element');
+        if ($prefix !== 'thumb' && $prefix !== 'large') {
             throw new Exception('Invalid element.');
         }
 
-        if ($element === 'thumb') {
+        if ($prefix === 'thumb') {
             $width   = $this->config->thumbWidth;
             $height  = $this->config->thumbHeight;
             $quality = $this->config->thumbQuality;
-        } elseif ($element === 'large') {
+        } elseif ($prefix === 'large') {
             $width   = $this->config->largeWidth;
             $height  = $this->config->largeHeight;
             $quality = $this->config->largeQuality;
         }
 
-        $localPath = $this->config->albumPath . '/' . $album . '/' . $filename;
-        $cacheKey  = $this->generateCacheId($element, $album . '/' . $filename, $localPath, $width, $height, $quality);
+        $localPath = $this->config->albumPath . '/' . $album . '/' . $basename;
+        $cacheKey  = $this->generateCacheId($prefix, $album . '/' . $basename, $localPath, $width, $height, $quality);
 
         if ($this->cache->hasItem($cacheKey)) {
+            $cacheItem = $this->cache->getItem($cacheKey);
+            $etag = $this->generateETag($cacheItem);
+
             // ETag
-            if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $cacheKey) {
+            if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
                 header('HTTP/1.1 304 Not Modified');
                 return;
             }
 
-            /* @var $fileObject SplFileObject */
-            $fileObject = $this->cache->getItem($cacheKey)->get();
+            /* @var $file SplFileObject */
+            $file = $cacheItem->get();
 
             // Modification date
-            if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $fileObject->getMTime()) {
+            if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $file->getMTime()) {
                 header('HTTP/1.1 304 Not Modified');
                 return;
             }
 
-            $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $fileObject->getMTime());
-            $this->send('image/jpeg', $lastModified, $cacheKey, $element . '-' . $filename);
-            $fileObject->fpassthru();
+            $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $file->getMTime());
+            $this->sendImageHeaders('image/jpeg', $lastModified, $etag, $prefix . '-' . $basename);
+            $file->fpassthru();
             return;
         }
 
         $imageTools = new ImageTools();
 
-        if ($element === 'thumb') {
+        if ($prefix === 'thumb') {
             $dstim2 = $imageTools->createThumb($imageTools->loadImage($localPath), $width, $height);
-        } elseif ($element === 'large') {
+        } elseif ($prefix === 'large') {
             $dstim2 = $imageTools->scale($imageTools->loadImage($localPath), $width, $height);
         }
 
         if ($this->cache->saveFromJpegImage($cacheKey, $dstim2, $quality)) {
             imagedestroy($dstim2);
 
-            /* @var $fileObject SplFileObject */
-            $fileObject = $this->cache->getItem($cacheKey)->get();
+            /* @var $file SplFileObject */
+            $cacheItem = $this->cache->getItem($cacheKey);
+            $file = $cacheItem->get();
 
-            $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $fileObject->getMTime());
-            $this->send('image/jpeg', $lastModified, $cacheKey, $element . '-' . $filename);
-            $fileObject->fpassthru();
+            $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $file->getMTime());
+            $this->sendImageHeaders('image/jpeg', $lastModified, $this->generateETag($cacheItem), $prefix . '-' . $basename);
+            $file->fpassthru();
             return;
         }
 
         $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T');
-        $this->send('image/jpeg', $lastModified, $cacheKey, $element . '-' . $filename);
+        $this->sendImageHeaders('image/jpeg', $lastModified, null, $prefix . '-' . $basename);
         imagejpeg($dstim2, null, $quality);
     }
 }

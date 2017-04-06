@@ -23,6 +23,15 @@ class FileCacheItem
 
     /**
      *
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     *
      * @return mixed
      */
     public function get()
