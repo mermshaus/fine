@@ -37,6 +37,12 @@ final class Application
 
     /**
      *
+     * @var ApplicationApi
+     */
+    private $api = null;
+
+    /**
+     *
      * @param Config $config
      * @param ViewScriptManager $viewScriptManager
      * @param FileCache $cache
@@ -57,6 +63,15 @@ final class Application
             header('Content-Type: text/plain; charset=UTF-8');
             echo $e->getMessage() . "\n";
         });
+    }
+
+    private function getApi()
+    {
+        if ($this->api === null) {
+            $this->api = new ApplicationApi($this);
+        }
+
+        return $this->api;
     }
 
     /**
@@ -91,7 +106,7 @@ final class Application
      *
      * @return bool
      */
-    public function isInSingleAlbumMode()
+    private function isInSingleAlbumMode()
     {
         return $this->config->singleAlbumMode;
     }
@@ -218,7 +233,7 @@ final class Application
         if ($ret instanceof View) {
             header('Content-Type: text/html; charset=utf-8');
 
-            $layout = new View($this, 'layout');
+            $layout = new View($this->getApi(), 'layout');
 
             $layout->contentView = $ret;
             $layout->html_id     = 'page-' . $action;
@@ -300,7 +315,7 @@ final class Application
             $ret .= "Orphaned elements deleted from cache: " . $clearedOrphanedItemsCount . "\n\n";
         }
 
-        $view = new View($this, 'status');
+        $view = new View($this->getApi(), 'status');
 
         $view->output = $ret;
 
@@ -472,7 +487,7 @@ final class Application
             }
         }
 
-        $view = new View($this, 'detail');
+        $view = new View($this->getApi(), 'detail');
 
         $view->album        = $album;
         $view->i            = $i;
@@ -528,7 +543,7 @@ final class Application
             $nextPageNumber     = ($activePage + 1 <= $pagesCount) ? $activePage + 1 : 1;
         }
 
-        $view = new View($this, 'album');
+        $view = new View($this->getApi(), 'album');
 
         $view->album              = $album;
         $view->activePage         = $activePage;
@@ -578,7 +593,7 @@ final class Application
             $coverImages[$album] = $images[0];
         }
 
-        $view = new View($this, 'index');
+        $view = new View($this->getApi(), 'index');
 
         $view->albums      = $albums;
         $view->coverImages = $coverImages;

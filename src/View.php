@@ -9,9 +9,9 @@ class View
 {
     /**
      *
-     * @var Application
+     * @var ApplicationApi
      */
-    private $app;
+    private $api;
 
     /**
      *
@@ -27,12 +27,12 @@ class View
 
     /**
      *
-     * @param Application $app
-     * @param Config $config
+     * @param ApplicationApi $api
+     * @param string $script
      */
-    public function __construct(Application $app, $script)
+    public function __construct(ApplicationApi $api, $script)
     {
-        $this->app    = $app;
+        $this->api    = $api;
         $this->script = $script;
     }
 
@@ -43,7 +43,7 @@ class View
      */
     public function e($s)
     {
-        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        return $this->api->e($s);
     }
 
     /**
@@ -54,7 +54,7 @@ class View
      */
     public function url($action, array $params = array())
     {
-        return $this->app->url($action, $params);
+        return $this->api->url($action, $params);
     }
 
     /**
@@ -64,10 +64,7 @@ class View
      */
     private function doInclude($resourceKey)
     {
-        $resource = $this->app->getViewScriptManager()->getScript($resourceKey);
-        $bound = $resource->bindTo($this);
-
-        $bound();
+        $this->api->doInclude($resourceKey, $this);
     }
 
     /**
