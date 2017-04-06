@@ -292,8 +292,8 @@ final class Application
 
                     $cacheKey = $this->generateCacheKey(
                         $prefix,
-                        $album . '/' . $image->getBasename(),
-                        $this->config->albumPath . '/' . $album . '/' . $image->getBasename(),
+                        $album,
+                        $image->getBasename(),
                         $width,
                         $height,
                         $quality
@@ -647,19 +647,22 @@ final class Application
     /**
      *
      * @param string $prefix
-     * @param string $path
-     * @param string $localPath
+     * @param string $albumName
+     * @param string $imageName
      * @param int $width
      * @param int $height
      * @param int $quality
      * @return string
      */
-    private function generateCacheKey($prefix, $path, $localPath, $width, $height, $quality)
+    private function generateCacheKey($prefix, $albumName, $imageName, $width, $height, $quality)
     {
+        $imageFullPath = $this->config->albumPath . '/' . $albumName . '/' . $imageName;
+
         $parts = array(
             $prefix,
-            md5($path),
-            filemtime($localPath),
+            substr(md5($albumName), 0, 10),
+            substr(md5($imageName), 0, 10),
+            filemtime($imageFullPath),
             $width,
             $height,
             $quality
@@ -720,8 +723,7 @@ final class Application
             $quality = $this->config->largeQuality;
         }
 
-        $localPath = $this->config->albumPath . '/' . $album . '/' . $basename;
-        $cacheKey  = $this->generateCacheKey($prefix, $album . '/' . $basename, $localPath, $width, $height, $quality);
+        $cacheKey = $this->generateCacheKey($prefix, $album, $basename, $width, $height, $quality);
 
         if ($this->cache->hasItem($cacheKey)) {
             $cacheItem = $this->cache->getItem($cacheKey);
@@ -749,6 +751,8 @@ final class Application
         }
 
         $imageTools = new ImageTools();
+
+        $localPath = $this->config->albumPath . '/' . $album . '/' . $basename;
 
         if ($prefix === 'thumb') {
             $dstim2 = $imageTools->createThumb($imageTools->loadImage($localPath), $width, $height);
