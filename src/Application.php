@@ -263,14 +263,31 @@ final class Application
 
         // Clear orphaned items
 
+        $info = array();
+
         $albums = ($this->isInSingleAlbumMode()) ? array('') : $this->getAlbums();
+
+        $first = true;
 
         foreach ($prefixes as $prefix) {
             $keysHashMap = array();
 
-            $counterImages = 0;
-
             foreach ($albums as $album) {
+                if (!isset($info[$album])) {
+                    $info[$album] = array(
+                        'count' => 0,
+                        'size'  => 0,
+                        'cache' => array()
+                    );
+                }
+
+                if (!isset($info[$album]['cache'][$prefix])) {
+                    $info[$album]['cache'][$prefix] = array(
+                        'count' => 0,
+                        'size'  => 0
+                    );
+                }
+
                 $images = $this->getImages($this->config->albumPath . '/' . $album);
 
                 foreach ($images as $image) {
@@ -301,23 +318,30 @@ final class Application
 
                     if ($this->cache->hasItem($cacheKey)) {
                         $keysHashMap[$cacheKey] = true;
+                        $info[$album]['cache'][$prefix]['count']++;
+
+                        $info[$album]['cache'][$prefix]['size'] += $this->cache->getItem($cacheKey)->get()->getSize();
                     }
 
-                    $counterImages++;
+                    if ($first) {
+                        $info[$album]['count']++;
+                        $info[$album]['size'] += $image->getFileSize();
+                    }
                 }
             }
 
             $clearedOrphanedItemsCount = $this->cache->clearItemsNotInList($prefix, $keysHashMap);
 
-            $ret .= $prefix . "\n";
-            $ret .= "Images found: " . $counterImages . "\n";
-            $ret .= "Active elements in cache: " . count($keysHashMap) . "\n";
-            $ret .= "Orphaned elements deleted from cache: " . $clearedOrphanedItemsCount . "\n\n";
+            $ret .= $prefix . ": orphaned elements deleted from cache: " . $clearedOrphanedItemsCount . "\n";
+
+            $first = false;
         }
 
         $view = new View($this->getApi(), 'status');
 
-        $view->output = $ret;
+        $view->prefixes = $prefixes;
+        $view->output   = $ret;
+        $view->info     = $info;
 
         return $view;
     }

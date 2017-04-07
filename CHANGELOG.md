@@ -8,6 +8,7 @@
 - Rotate JPEG images according to available EXIF data.
 - Rudimentary unit tests.
 - Check syntax of generated `index.php` during build process.
+- Show status grouped by album in status view.
 
 ### Changed
 

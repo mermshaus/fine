@@ -1,3 +1,46 @@
+<?php
+
+$f = function ($s) {
+    if ($s > 0) {
+        return $this->e($s);
+    }
+
+    return '&nbsp;';
+};
+
+$formatFileSize = function ($s) {
+    if ($s > 0) {
+        return $this->e(number_format($s / 1000000, 1));
+    }
+
+    return '&nbsp;';
+};
+
+$sums = array(
+    'count' => 0,
+    'size'  => 0,
+    'cache' => array()
+);
+
+foreach ($this->prefixes as $prefix) {
+    $sums['cache'][$prefix] = array(
+        'count' => 0,
+        'size'  => 0
+    );
+}
+
+foreach ($this->info as $data) {
+    $sums['count'] += $data['count'];
+    $sums['size']  += $data['size'];
+
+    foreach ($this->prefixes as $prefix) {
+        $sums['cache'][$prefix]['count'] += $data['cache'][$prefix]['count'];
+        $sums['cache'][$prefix]['size']  += $data['cache'][$prefix]['size'];
+    }
+}
+
+?>
+
 <div class="ui-controls">
     <a data-action="navigation-up" href="<?=$this->e($this->url('index'))?>">← <?=$this->e('Status page')?></a>
 </div>
@@ -5,5 +48,50 @@
 <div class="ui-content">
 
 <pre><?=$this->e($this->output)?></pre>
+
+<table>
+    <tr>
+        <th rowspan="3">Album</th>
+        <th rowspan="3">Images</th>
+        <th rowspan="3">size</th>
+        <th colspan="<?=(count($this->prefixes) * 2)?>">Cache</th>
+    </tr>
+    <tr>
+        <?php foreach ($this->prefixes as $prefix): ?>
+            <th colspan="2"><?=$this->e($prefix)?></th>
+        <?php endforeach; ?>
+    </tr>
+    <tr>
+        <?php foreach ($this->prefixes as $prefix): ?>
+            <th>count</th>
+            <th>size</th>
+        <?php endforeach; ?>
+    </tr>
+
+<?php foreach ($this->info as $album => $data): ?>
+
+<tr>
+    <td><a href="<?=$this->e($this->url('album', array('album' => $album)))?>"><?=$this->e(($album !== '') ? $album : 'link')?></a></td>
+    <td class="text-right"><?=$f($data['count'])?></td>
+    <td class="text-right"><?=$formatFileSize($data['size'])?></td>
+    <?php foreach ($this->prefixes as $prefix): ?>
+        <td class="text-right"><?=$f($data['cache'][$prefix]['count'])?></td>
+        <td class="text-right"><?=$formatFileSize($data['cache'][$prefix]['size'])?></td>
+    <?php endforeach; ?>
+</tr>
+
+<?php endforeach; ?>
+
+<tr>
+    <td class="text-right">&sum;</td>
+    <td class="text-right"><?=$f($sums['count'])?></td>
+    <td class="text-right"><?=$formatFileSize($sums['size'])?></td>
+    <?php foreach ($this->prefixes as $prefix): ?>
+        <td class="text-right"><?=$f($sums['cache'][$prefix]['count'])?></td>
+        <td class="text-right"><?=$formatFileSize($sums['cache'][$prefix]['size'])?></td>
+    <?php endforeach; ?>
+</tr>
+
+<table>
 
 </div>

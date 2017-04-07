@@ -12,6 +12,10 @@
     *zoom: 1;
 }
 
+.text-right {
+    text-align: right;
+}
+
 html, body {
     height: 100%;
     width: 100%;
@@ -32,6 +36,13 @@ a {
 a.active {
     font-weight: bold;
     text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #333;
+    padding: 4px 6px;
 }
 
 .ui-controls, .ui-content {

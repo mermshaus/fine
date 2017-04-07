@@ -88,8 +88,8 @@ final class Image
      */
     public function getFileSize()
     {
-        if (!$this->isLoaded) {
-            $this->load();
+        if ($this->fileSize === null) {
+            $this->fileSize = filesize($this->path);
         }
 
         return $this->fileSize;
