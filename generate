@@ -186,6 +186,11 @@ TPL;
                 'path' => __DIR__ . '/assets/jquery-1.12.4.min.js',
                 'operations' => array()
             ),
+            'jquery.mobile.custom.min.js' => array(
+                'type' => 'application/javascript',
+                'path' => __DIR__ . '/assets/jquery.mobile.custom.min.js',
+                'operations' => array()
+            ),
             'fine.js' => array(
                 'type' => 'application/javascript',
                 'path' => __DIR__ . '/assets/fine.js',

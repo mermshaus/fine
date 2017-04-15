@@ -6,6 +6,7 @@
 ### Added
 
 - Link to Fine website in footer string.
+- Support for touch gestures (swipeleft/swiperight) in album and image views.
 
 
 ## [0.4.0] - 2017-04-07

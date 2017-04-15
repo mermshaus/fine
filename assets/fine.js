@@ -39,19 +39,13 @@ $(function () {
         }
     });
 
-    /**
-     * @todo switch to https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
-     * for this
-     */
-    /*var mc = new Hammer($('body')[0]);
-
-    mc.on('swipeleft', function () {
-        var e = $.Event('keydown', { which: 39 });
+    $(document).on('swipeleft', function () {
+        var e = $.Event('keydown', { which: 39 /* Right Arrow */ });
         $(document).trigger(e);
     });
 
-    mc.on('swiperight', function () {
-        var e = $.Event('keydown', { which: 37 });
+    $(document).on('swiperight', function () {
+        var e = $.Event('keydown', { which: 37 /* Left Arrow */ });
         $(document).trigger(e);
-    });*/
+    });
 });
