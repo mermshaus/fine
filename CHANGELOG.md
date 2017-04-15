@@ -1,6 +1,8 @@
 # Changelog
 
 
+## [Unreleased]
+
 ## [0.4.0] - 2017-04-07
 
 ### Added
@@ -28,4 +30,5 @@
 First public release.
 
 
+[Unreleased]: https://github.com/mermshaus/fine/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/mermshaus/fine/compare/v0.3.0...v0.4.0

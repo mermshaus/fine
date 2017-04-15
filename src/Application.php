@@ -15,7 +15,7 @@ final class Application
     /**
      * Version number of the application (uses Semantic Versioning)
      */
-    const VERSION = '0.4.0';
+    const VERSION = '0.5.0-dev';
 
     /**
      *
@@ -532,8 +532,6 @@ final class Application
      */
     private function albumAction() // album, page
     {
-        $config = $this->config;
-
         $album = $this->getGetString('album');
         $this->assertValidAlbum($album);
 
@@ -547,7 +545,7 @@ final class Application
 
         $imagesCount = count($images);
 
-        $images = array_slice($images, ($activePage - 1) * $config->imagesPerPage, $config->imagesPerPage);
+        $images = array_slice($images, ($activePage - 1) * $this->config->imagesPerPage, $this->config->imagesPerPage);
 
         if (count($images) === 0) {
             throw new Exception('No data for given parameters.');
@@ -557,7 +555,7 @@ final class Application
 
         do {
             $pagesCount++;
-        } while ($pagesCount * $config->imagesPerPage < $imagesCount);
+        } while ($pagesCount * $this->config->imagesPerPage < $imagesCount);
 
         $previousPageNumber = -1;
         $nextPageNumber     = -1;

@@ -293,6 +293,11 @@ th, td {
     font-style: italic;
 }
 
+#fine-logo .fine-logo-title a {
+    text-decoration: none;
+    font-weight: inherit;
+}
+
 #fine-logo .fine-logo-version {
     font-size: 9px;
 }
