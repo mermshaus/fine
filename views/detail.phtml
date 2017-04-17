@@ -16,18 +16,13 @@ $url = $this->url('album', $params);
     <div class="ui-controls">
 
         <a data-action="navigation-up" href="<?=$this->e($url)?>">
-            ←
-            <?php if ($this->album !== ''): ?>
-                <?=$this->e($this->album)?>
-            <?php endif; ?>
+            ← <?=$this->e($this->filename)?>
+            (<?=$this->e($this->i + 1)?>/<?=$this->e(count($this->images))?>)
         </a>
 
         <?php if (count($this->images) > 1): ?>
             <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->album)))?>">rand</a>
         <?php endif; ?>
-
-        <?=$this->e($this->filename)?>
-        (<?=$this->e($this->i + 1)?>/<?=$this->e(count($this->images))?>)
 
     </div>
 </div>
