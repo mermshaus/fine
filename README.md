@@ -61,9 +61,9 @@ Supported file formats (checked via file extension):
 - JPEG (*.jpeg, *.jpg)
 - PNG (*.png)
 
-Keyboard navigation:
+Keyboard and touch navigation:
 
-- `←`, `→`
+- `←`, `→`, `<swipeleft>`, `<swiperight>`
   - Album view: Go to next/previous page.
   - Detail view: Go to next/previous image.
 - `d`

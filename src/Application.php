@@ -15,7 +15,7 @@ final class Application
     /**
      * Version number of the application (uses Semantic Versioning)
      */
-    const VERSION = '0.5.0-dev';
+    const VERSION = '0.5.0';
 
     /**
      *
