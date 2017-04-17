@@ -346,8 +346,21 @@ th, td {
     font-size: 9px;
 }
 
+#fine-scrolltop {
+     cursor: pointer;
+     width: 30px;
+     height: 30px;
+     line-height: 30px;
+     margin: 15px auto;
+     text-align: center;
+}
+
 
 
 #navigation-random {
+    display: none;
+}
+
+.active-javascript {
     display: none;
 }

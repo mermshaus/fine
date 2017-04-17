@@ -7,6 +7,7 @@
 
 - Link to Fine website in footer string.
 - Support for touch gestures (swipeleft/swiperight) in album and image views.
+- “Scroll to top” link to bottom of certain views.
 
 ### Changed
 

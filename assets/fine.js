@@ -48,4 +48,10 @@ $(function () {
         var e = $.Event('keydown', { which: 37 /* Left Arrow */ });
         $(document).trigger(e);
     });
+
+    $('[data-action~="navigation-scrolltop"]').on('click', function () {
+        $('html, body').animate({ scrollTop: 0 }, 'fast');
+    });
+
+    $('.active-javascript').css('display','block');
 });
