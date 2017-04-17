@@ -26,14 +26,6 @@ $url = $this->url('album', $params);
             <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->album)))?>">rand</a>
         <?php endif; ?>
 
-        <?php if ($this->prevImageUrl !== ''): ?>
-            <a data-action="navigation-previous" href="<?=$this->e($this->prevImageUrl)?>">«</a>
-        <?php endif; ?>
-
-        <?php if ($this->nextImageUrl !== ''): ?>
-            <a data-action="navigation-next" href="<?=$this->e($this->nextImageUrl)?>">»</a>
-        <?php endif; ?>
-
         <?=$this->e($this->filename)?>
         (<?=$this->e($this->i + 1)?>/<?=$this->e(count($this->images))?>)
 
@@ -41,13 +33,17 @@ $url = $this->url('album', $params);
 </div>
 
 <div class="detail-container">
-    <?php if ($this->nextImageUrl !== ''): ?>
-        <a href="<?=$this->e($this->nextImageUrl)?>">
-    <?php endif; ?>
-
     <img class="detail-image" src="<?=$this->e($this->imageUrl)?>" title="<?=$this->e($this->filename)?>">
 
+    <?php if ($this->prevImageUrl !== ''): ?>
+        <div class="navigation-previous">
+            <a data-action="navigation-previous" href="<?=$this->e($this->prevImageUrl)?>"><span>←</span></a>
+        </div>
+    <?php endif; ?>
+
     <?php if ($this->nextImageUrl !== ''): ?>
-        </a>
+        <div class="navigation-next">
+            <a data-action="navigation-next" href="<?=$this->e($this->nextImageUrl)?>"><span>→</span></a>
+        </div>
     <?php endif; ?>
 </div>

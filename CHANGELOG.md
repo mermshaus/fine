@@ -11,6 +11,8 @@
 ### Changed
 
 - Use flexbox instead of `display: table;` for detail view.
+- Add previous/next controls as image overlay (left and right side of screen).
+  Remove from UI controls.
 
 ### Fixed
 
