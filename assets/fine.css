@@ -238,28 +238,23 @@ th, td {
 /* page-detail */
 
 #page-detail body {
-    display: table;
-}
-
-#page-detail .ui-controls-wrapper {
-    display: table-row;
+  display: flex;
+  flex-direction: column;
 }
 
 #page-detail div.detail-container {
+    flex-grow: 1;
     position: relative;
-    height: 100%;
-    width: 100%;
-    display:table-row;
 }
 
 #page-detail img.detail-image {
     max-width: 100%;
     max-height: 100%;
     position: absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     margin: auto;
 }
 

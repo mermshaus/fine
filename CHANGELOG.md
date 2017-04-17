@@ -8,6 +8,14 @@
 - Link to Fine website in footer string.
 - Support for touch gestures (swipeleft/swiperight) in album and image views.
 
+### Changed
+
+- Use flexbox instead of `display: table;` for detail view.
+
+### Fixed
+
+- Chrome: Images in detail view can no longer cover UI controls.
+
 
 ## [0.4.0] - 2017-04-07
 
