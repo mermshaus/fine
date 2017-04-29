@@ -238,8 +238,8 @@ th, td {
 /* page-detail */
 
 #page-detail body {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 #page-detail div.detail-container {
