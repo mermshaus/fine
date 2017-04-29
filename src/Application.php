@@ -614,6 +614,13 @@ final class Application
         foreach ($albums as $album) {
             $images = $this->getImages($this->config->albumPath . '/' . $album);
 
+            if (count($images) === 0) {
+                throw new Exception(sprintf(
+                    'Unable to read images from album "%s". Album may be empty or image file permissions may be too restrictive',
+                    $album
+                ));
+            }
+
             $coverImages[$album] = $images[0];
         }
 

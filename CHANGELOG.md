@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [Unreleased]
+
+### Added
+
+- Comprehensible error message when album without accessible image files is
+  present.
+
+
 ## [0.5.0] - 2017-04-17
 
 ### Added
@@ -48,5 +56,6 @@
 First public release.
 
 
+[Unreleased]: https://github.com/mermshaus/fine/compare/v0.5.0...HEAD
 [0.5.0]: https://github.com/mermshaus/fine/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/mermshaus/fine/compare/v0.3.0...v0.4.0
