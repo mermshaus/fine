@@ -15,7 +15,7 @@ final class Application
     /**
      * Version number of the application (uses Semantic Versioning)
      */
-    const VERSION = '0.5.0';
+    const VERSION = '0.6.0-dev';
 
     /**
      *
@@ -380,14 +380,16 @@ final class Application
     {
         $file = $this->getGetString('file', '');
 
+        $mtime = filemtime(__FILE__);
+
         // ETag
-        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === md5(filemtime(__FILE__) . '-' . $file)) {
+        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === md5($mtime . '-' . $file)) {
             header('HTTP/1.1 304 Not Modified');
             return;
         }
 
         // Modification date
-        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === filemtime(__FILE__)) {
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $mtime) {
             header('HTTP/1.1 304 Not Modified');
             return;
         }
@@ -395,11 +397,11 @@ final class Application
         $data = $this->loadResource($file);
 
         header('Content-Type: ' . $data['type'] . '; charset=UTF-8');
-        header('ETag: ' . md5(filemtime(__FILE__) . '-' . $file));
+        header('ETag: ' . md5($mtime . '-' . $file));
 
         header('Cache-Control: public, max-age=2592000'); // 30 days
 
-        $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', filemtime(__FILE__));
+        $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $mtime);
 
         header('Last-Modified: ' . $lastModified);
 
