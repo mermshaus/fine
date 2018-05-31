@@ -2,16 +2,19 @@
 
 namespace mermshaus\fine;
 
-/**
- *
- */
 class FileCacheItem
 {
+    /**
+     * @var string
+     */
     private $key;
+
+    /**
+     * @var mixed
+     */
     private $value;
 
     /**
-     *
      * @param string $key
      * @param mixed $value
      */
@@ -22,7 +25,6 @@ class FileCacheItem
     }
 
     /**
-     *
      * @return string
      */
     public function getKey()
@@ -31,7 +33,6 @@ class FileCacheItem
     }
 
     /**
-     *
      * @return mixed
      */
     public function get()

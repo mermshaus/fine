@@ -2,14 +2,8 @@
 
 namespace mermshaus\fine;
 
-use Exception;
-use LogicException;
-use mermshaus\fine\model\Image;
-use SplFileObject;
+use mermshaus\fine\model;
 
-/**
- *
- */
 final class Application
 {
     /**
@@ -18,34 +12,29 @@ final class Application
     const VERSION = '0.6.0-dev';
 
     /**
-     *
      * @var Config
      */
     private $config;
 
     /**
-     *
      * @var ViewScriptManager
      */
     private $viewScriptManager;
 
     /**
-     *
      * @var FileCache
      */
     private $cache;
 
     /**
-     *
      * @var ApplicationApi
      */
     private $api = null;
 
     /**
-     *
-     * @param Config $config
+     * @param Config            $config
      * @param ViewScriptManager $viewScriptManager
-     * @param FileCache $cache
+     * @param FileCache         $cache
      */
     public function __construct(
         Config $config,
@@ -58,10 +47,16 @@ final class Application
 
         $this->cache = $cache;
 
-        set_exception_handler(function (Exception $e) {
-            header('HTTP/1.1 404 Not Found');
-            header('Content-Type: text/plain; charset=UTF-8');
-            echo $e->getMessage() . "\n";
+        set_exception_handler(function ($e) {
+            if ($e instanceof \Exception) {
+                header('HTTP/1.1 404 Not Found');
+                header('Content-Type: text/plain; charset=UTF-8');
+                echo $e->getMessage() . "\n";
+            } else {
+                header('HTTP/1.1 404 Not Found');
+                header('Content-Type: text/plain; charset=UTF-8');
+                var_dump($e);
+            }
         });
     }
 
@@ -114,12 +109,13 @@ final class Application
     /**
      *
      * @param string $action
-     * @param array $params
+     * @param array  $params
+     *
      * @return string
      */
-    public function url($action, array $params = array())
+    public function url($action, array $params = [])
     {
-        if (in_array($action, array('album', 'detail', 'image')) && isset($params['album']) && $params['album'] === '') {
+        if (in_array($action, ['album', 'detail', 'image']) && isset($params['album']) && $params['album'] === '') {
             unset($params['album']);
         }
 
@@ -130,7 +126,7 @@ final class Application
         }
 
         if ($action !== 'index') {
-            $params = array_merge(array('action' => $action), $params);
+            $params = array_merge(['action' => $action], $params);
         }
 
         if (count($params) > 0) {
@@ -143,30 +139,30 @@ final class Application
     private function loadImage($file)
     {
         if (!is_readable($file)) {
-            throw new Exception(sprintf('File %s is not readable.', basename($file)));
+            throw new \Exception(sprintf('File %s is not readable.', basename($file)));
         }
 
-        return new Image($file);
+        return new model\Image($file);
     }
 
     /**
-     *
      * @param string $path
-     * @return Image[]
-     * @throws Exception
+     *
+     * @return model\Image[]
+     * @throws \Exception
      */
     private function getImages($path)
     {
         $files = glob($path . '/*.{JPG,jpg,JPEG,jpeg,PNG,png,GIF,gif}', GLOB_BRACE);
 
-        $images = array();
+        $images = [];
 
         foreach ($files as $file) {
             $images[] = $this->loadImage($file);
         }
 
         // Sorts by creation date (desc) and filename (asc)
-        usort($images, function (Image $a, Image $b) {
+        usort($images, function (model\Image $a, model\Image $b) {
             /*if ($a->sortDate < $b->sortDate) {
                 return 1;
             } elseif ($a->sortDate > $b->sortDate) {
@@ -175,18 +171,19 @@ final class Application
 
             if ($a->getBasename() < $b->getBasename()) {
                 return -1;
-            } elseif ($a->getBasename() > $b->getBasename()) {
+            }
+
+            if ($a->getBasename() > $b->getBasename()) {
                 return 1;
             }
 
-            throw new LogicException();
+            throw new \LogicException('Failed sorting images');
         });
 
         return $images;
     }
 
     /**
-     *
      * @return array
      */
     private function getAlbums()
@@ -197,7 +194,7 @@ final class Application
             return $albums;
         }
 
-        $albums = array();
+        $albums = [];
 
         foreach (glob($this->config->albumPath . '/*', GLOB_ONLYDIR) as $p) {
             $tmp = basename($p);
@@ -215,8 +212,7 @@ final class Application
     }
 
     /**
-     *
-     * @throws Exception
+     * @throws \Exception
      */
     public function run()
     {
@@ -225,7 +221,7 @@ final class Application
         $methodName = $action . 'Action';
 
         if (!method_exists($this, $methodName)) {
-            throw new Exception(sprintf('Unknown action: "%s"', $action));
+            throw new \Exception(sprintf('Unknown action: "%s"', $action));
         }
 
         $ret = $this->$methodName();
@@ -243,12 +239,9 @@ final class Application
         }
     }
 
-    /**
-     *
-     */
     private function statusAction() // (no parameters)
     {
-        $prefixes = array('thumb', 'large');
+        $prefixes = ['thumb', 'large'];
 
         $ret = '';
 
@@ -263,29 +256,29 @@ final class Application
 
         // Clear orphaned items
 
-        $info = array();
+        $info = [];
 
-        $albums = ($this->isInSingleAlbumMode()) ? array('') : $this->getAlbums();
+        $albums = ($this->isInSingleAlbumMode()) ? [''] : $this->getAlbums();
 
         $first = true;
 
         foreach ($prefixes as $prefix) {
-            $keysHashMap = array();
+            $keysHashMap = [];
 
             foreach ($albums as $album) {
                 if (!isset($info[$album])) {
-                    $info[$album] = array(
+                    $info[$album] = [
                         'count' => 0,
                         'size'  => 0,
-                        'cache' => array()
-                    );
+                        'cache' => [],
+                    ];
                 }
 
                 if (!isset($info[$album]['cache'][$prefix])) {
-                    $info[$album]['cache'][$prefix] = array(
+                    $info[$album]['cache'][$prefix] = [
                         'count' => 0,
-                        'size'  => 0
-                    );
+                        'size'  => 0,
+                    ];
                 }
 
                 $images = $this->getImages($this->config->albumPath . '/' . $album);
@@ -304,7 +297,7 @@ final class Application
                         $height  = $this->config->largeHeight;
                         $quality = $this->config->largeQuality;
                     } else {
-                        throw new Exception(sprintf('Unknown prefix "%s" in status action', $prefix));
+                        throw new \Exception(sprintf('Unknown prefix "%s" in status action', $prefix));
                     }
 
                     $cacheKey = $this->generateCacheKey(
@@ -347,11 +340,12 @@ final class Application
     }
 
     /**
-     *
      * @staticvar array $jsonStore
+     *
      * @param string $resourceKey
+     *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     private function loadResource($resourceKey)
     {
@@ -367,15 +361,12 @@ final class Application
         }
 
         if (!array_key_exists($resourceKey, $jsonStore)) {
-            throw new Exception(sprintf('Unknown resource file "%s"', $resourceKey));
+            throw new \Exception(sprintf('Unknown resource file "%s"', $resourceKey));
         }
 
         return $jsonStore[$resourceKey];
     }
 
-    /**
-     *
-     */
     private function assetAction() // file
     {
         $file = $this->getGetString('file', '');
@@ -410,12 +401,13 @@ final class Application
 
     /**
      * @param $album
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     private function assertValidAlbum($album)
     {
         if (!is_string($album)) {
-            throw new LogicException();
+            throw new \LogicException();
         }
 
         if ($this->isInSingleAlbumMode() && $album === '') {
@@ -423,23 +415,24 @@ final class Application
         }
 
         if (!in_array($album, $this->getAlbums(), true)) {
-            throw new Exception(sprintf('Unknown album "%s"', $album));
+            throw new \Exception(sprintf('Unknown album "%s"', $album));
         }
     }
 
     /**
      * @param string $album
      * @param string $filename
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     private function assertValidFilename($album, $filename)
     {
         if (!is_string($album)) {
-            throw new LogicException();
+            throw new \LogicException();
         }
 
         if (!is_string($filename)) {
-            throw new LogicException();
+            throw new \LogicException();
         }
 
         $this->assertValidAlbum($album);
@@ -447,27 +440,24 @@ final class Application
         $normalizedAlbumPath = realpath($this->config->albumPath . '/' . $album);
 
         if ($normalizedAlbumPath === false) {
-            throw new LogicException('Album path is empty.');
+            throw new \LogicException('Album path is empty.');
         }
 
         $normalizedFilePath = realpath($normalizedAlbumPath . '/' . $filename);
 
         if ($normalizedFilePath === false) {
-            throw new Exception('File does not exist.');
+            throw new \Exception('File does not exist.');
         }
 
         if ($normalizedFilePath !== $normalizedAlbumPath . '/' . $filename) {
-            throw new Exception('Filename is not normalized.');
+            throw new \Exception('Filename is not normalized.');
         }
 
         if ($normalizedAlbumPath !== pathinfo($normalizedFilePath, PATHINFO_DIRNAME)) {
-            throw new LogicException('This should never happen.');
+            throw new \LogicException('This should never happen.');
         }
     }
 
-    /**
-     *
-     */
     private function detailAction() // album, filename
     {
         $album = $this->getGetString('album');
@@ -476,7 +466,7 @@ final class Application
         $filename = $this->getGetString('filename');
         $this->assertValidFilename($album, $filename);
 
-        $imageUrl = $this->url('image', array('album' => $album, 'filename' => $filename, 'element' => 'large'));
+        $imageUrl = $this->url('image', ['album' => $album, 'filename' => $filename, 'element' => 'large']);
 
         $albumPath = $this->config->albumPath . '/' . $album;
 
@@ -501,15 +491,15 @@ final class Application
 
         if (count($images) > 1) {
             if ($i - 1 >= 0) {
-                $prevImageUrl = $this->url('detail', array('album' => $album, 'filename' => $images[$i - 1]->getBasename()));
+                $prevImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[$i - 1]->getBasename()]);
             } else {
-                $prevImageUrl = $this->url('detail', array('album' => $album, 'filename' => $images[count($images) - 1]->getBasename()));
+                $prevImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[count($images) - 1]->getBasename()]);
             }
 
             if ($i + 1 < count($images)) {
-                $nextImageUrl = $this->url('detail', array('album' => $album, 'filename' => $images[$i + 1]->getBasename()));
+                $nextImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[$i + 1]->getBasename()]);
             } else {
-                $nextImageUrl = $this->url('detail', array('album' => $album, 'filename' => $images[0]->getBasename()));
+                $nextImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[0]->getBasename()]);
             }
         }
 
@@ -529,8 +519,7 @@ final class Application
     }
 
     /**
-     *
-     * @throws Exception
+     * @throws \Exception
      */
     private function albumAction() // album, page
     {
@@ -539,7 +528,7 @@ final class Application
 
         $activePage = $this->getGetString('page', '1');
         if (preg_match('/\A[1-9][0-9]*\z/', $activePage) === 0) {
-            throw new Exception('Value for page parameter must be >= 1.');
+            throw new \Exception('Value for page parameter must be >= 1.');
         }
         $activePage = (int) $activePage;
 
@@ -550,7 +539,7 @@ final class Application
         $images = array_slice($images, ($activePage - 1) * $this->config->imagesPerPage, $this->config->imagesPerPage);
 
         if (count($images) === 0) {
-            throw new Exception('No data for given parameters.');
+            throw new \Exception('No data for given parameters.');
         }
 
         $pagesCount = 0;
@@ -563,7 +552,7 @@ final class Application
         $nextPageNumber     = -1;
 
         if ($pagesCount > 1) {
-            $previousPageNumber = ($activePage - 1 > 0)            ? $activePage - 1 : $pagesCount;
+            $previousPageNumber = ($activePage - 1 > 0) ? $activePage - 1 : $pagesCount;
             $nextPageNumber     = ($activePage + 1 <= $pagesCount) ? $activePage + 1 : 1;
         }
 
@@ -582,7 +571,6 @@ final class Application
     }
 
     /**
-     *
      * @return bool
      */
     private function canUseCache()
@@ -599,7 +587,8 @@ final class Application
     }
 
     /**
-     *
+     * @return View
+     * @throws \Exception
      */
     private function indexAction() // (no parameters)
     {
@@ -609,13 +598,13 @@ final class Application
 
         $albums = $this->getAlbums();
 
-        $coverImages = array();
+        $coverImages = [];
 
         foreach ($albums as $album) {
             $images = $this->getImages($this->config->albumPath . '/' . $album);
 
             if (count($images) === 0) {
-                throw new Exception(sprintf(
+                throw new \Exception(sprintf(
                     'Unable to read images from album "%s". Album may be empty or image file permissions may be too restrictive',
                     $album
                 ));
@@ -634,7 +623,7 @@ final class Application
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     private function randomAction() // album
     {
@@ -645,14 +634,14 @@ final class Application
 
         $image = $images[array_rand($images)];
 
-        $url = $this->url('detail', array('album' => $album, 'filename' => $image->getBasename()));
+        $url = $this->url('detail', ['album' => $album, 'filename' => $image->getBasename()]);
 
         $this->doRedirect($url);
     }
 
     /**
-     *
-     * @param string|null $file
+     * @param string      $mimeType
+     * @param string|null $lastModified
      * @param string|null $etag
      * @param string|null $filename
      */
@@ -676,38 +665,36 @@ final class Application
     }
 
     /**
-     *
      * @param string $prefix
      * @param string $albumName
      * @param string $imageName
-     * @param int $width
-     * @param int $height
-     * @param int $quality
+     * @param int    $width
+     * @param int    $height
+     * @param int    $quality
+     *
      * @return string
      */
     private function generateCacheKey($prefix, $albumName, $imageName, $width, $height, $quality)
     {
         $imageFullPath = $this->config->albumPath . '/' . $albumName . '/' . $imageName;
 
-        $parts = array(
+        $parts = [
             $prefix,
             substr(md5($albumName), 0, 10),
             substr(md5($imageName), 0, 10),
             filemtime($imageFullPath),
             $width,
             $height,
-            $quality
-        );
+            $quality,
+        ];
 
-        $cacheKey = implode(',', $parts) . '.cache';
-
-        return $cacheKey;
+        return implode(',', $parts) . '.cache';
     }
 
     /**
-     *
-     * @param string $key
+     * @param string      $key
      * @param string|null $default
+     *
      * @return string|null
      */
     private function getGetString($key, $default = '')
@@ -721,15 +708,14 @@ final class Application
 
     private function generateETag(FileCacheItem $cacheItem)
     {
-        /* @var $fileObject SplFileObject */
+        /* @var $fileObject \SplFileObject */
         $file = $cacheItem->get();
 
         return $file->getMTime();
     }
 
     /**
-     *
-     * @throws Exception
+     * @throws \Exception
      */
     private function imageAction() // album, filename, element
     {
@@ -741,7 +727,7 @@ final class Application
 
         $prefix = $this->getGetString('element');
         if ($prefix !== 'thumb' && $prefix !== 'large') {
-            throw new Exception('Invalid element.');
+            throw new \Exception('Invalid element.');
         }
 
         if ($prefix === 'thumb') {
@@ -758,7 +744,7 @@ final class Application
 
         if ($this->cache->hasItem($cacheKey)) {
             $cacheItem = $this->cache->getItem($cacheKey);
-            $etag = $this->generateETag($cacheItem);
+            $etag      = $this->generateETag($cacheItem);
 
             // ETag
             if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
@@ -766,7 +752,7 @@ final class Application
                 return;
             }
 
-            /* @var $file SplFileObject */
+            /* @var $file \SplFileObject */
             $file = $cacheItem->get();
 
             // Modification date
@@ -794,9 +780,9 @@ final class Application
         if ($this->cache->saveFromJpegImage($cacheKey, $dstim2, $quality)) {
             imagedestroy($dstim2);
 
-            /* @var $file SplFileObject */
+            /* @var $file \SplFileObject */
             $cacheItem = $this->cache->getItem($cacheKey);
-            $file = $cacheItem->get();
+            $file      = $cacheItem->get();
 
             $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $file->getMTime());
             $this->sendImageHeaders('image/jpeg', $lastModified, $this->generateETag($cacheItem), $prefix . '-' . $basename);

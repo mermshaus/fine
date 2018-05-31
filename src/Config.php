@@ -2,9 +2,6 @@
 
 namespace mermshaus\fine;
 
-/**
- *
- */
 final class Config
 {
     public $albumPath;
@@ -21,14 +18,10 @@ final class Config
     public $largeQuality = 75;
 
     /**
-     *
      * @var int
      */
     public $imagesPerPage = 120;
 
-    /**
-     *
-     */
     public function __construct($configPath = null)
     {
         // Default values

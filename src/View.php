@@ -2,33 +2,26 @@
 
 namespace mermshaus\fine;
 
-/**
- *
- */
 class View
 {
     /**
-     *
      * @var ApplicationApi
      */
     private $api;
 
     /**
-     *
      * @var string
      */
     private $script;
 
     /**
-     *
      * @var array
      */
-    private $values = array();
+    private $values = [];
 
     /**
-     *
      * @param ApplicationApi $api
-     * @param string $script
+     * @param string         $script
      */
     public function __construct(ApplicationApi $api, $script)
     {
@@ -37,8 +30,8 @@ class View
     }
 
     /**
-     *
      * @param mixed $s
+     *
      * @return string
      */
     public function e($s)
@@ -47,20 +40,21 @@ class View
     }
 
     /**
-     *
      * @param string $action
-     * @param array $params
+     * @param array  $params
+     *
      * @return string
      */
-    public function url($action, array $params = array())
+    public function url($action, array $params = [])
     {
         return $this->api->url($action, $params);
     }
 
     /**
-     *
      * @param string $resourceKey
+     *
      * @return string
+     * @throws \Exception
      */
     private function doInclude($resourceKey)
     {
@@ -68,9 +62,8 @@ class View
     }
 
     /**
-     *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function __set($name, $value)
     {
@@ -78,8 +71,8 @@ class View
     }
 
     /**
-     *
      * @param string $name
+     *
      * @return mixed
      */
     public function __get($name)
@@ -92,11 +85,12 @@ class View
     }
 
     /**
-     *
      * @param array $vars
+     *
      * @return string
+     * @throws \Exception
      */
-    public function render(array $vars = array())
+    public function render(array $vars = [])
     {
         ob_start();
 
@@ -106,10 +100,11 @@ class View
     }
 
     /**
-     *
      * @param array $vars
+     *
+     * @throws \Exception
      */
-    public function output(array $vars = array())
+    public function output(array $vars = [])
     {
         foreach ($vars as $key => $value) {
             $this->$key = $value;

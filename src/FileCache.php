@@ -2,22 +2,14 @@
 
 namespace mermshaus\fine;
 
-use Exception;
-use SplFileObject;
-
-/**
- *
- */
 class FileCache
 {
     /**
-     *
      * @var string
      */
     private $cacheDir;
 
     /**
-     *
      * @param string $cacheDir
      */
     public function __construct($cacheDir)
@@ -30,19 +22,18 @@ class FileCache
     }
 
     /**
-     *
      * @return bool
      */
     public function isWritable()
     {
-        return (is_writable($this->cacheDir));
+        return is_writable($this->cacheDir);
     }
 
     /**
-     *
-     * @param string $key
+     * @param string   $key
      * @param resource $imageResource
-     * @param int $quality
+     * @param int      $quality
+     *
      * @return boolean
      */
     public function saveFromJpegImage($key, $imageResource, $quality)
@@ -61,7 +52,9 @@ class FileCache
      * because of deprecated prefixes)
      *
      * @param array $managedCachePrefixes
+     *
      * @return int
+     * @throws \Exception
      */
     public function clearUnmanagedItems(array $managedCachePrefixes)
     {
@@ -96,9 +89,10 @@ class FileCache
     /**
      *
      * @param string $prefix
-     * @param array $keysHashMap
+     * @param array  $keysHashMap
+     *
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
     public function clearItemsNotInList($prefix, array $keysHashMap)
     {
@@ -109,7 +103,7 @@ class FileCache
 
             if (!isset($keysHashMap[$pathinfo['basename']])) {
                 if ($pathinfo['extension'] !== 'cache') {
-                    throw new Exception();
+                    throw new \Exception();
                 }
                 $this->deleteItem($pathinfo['basename']);
                 $deleteCounter++;
@@ -120,14 +114,14 @@ class FileCache
     }
 
     /**
-     *
      * @param string $key
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     public function deleteItem($key)
     {
         if (!$this->hasItem($key)) {
-            throw new Exception(sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key));
+            throw new \Exception(sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key));
         }
 
         $filepath = $this->cacheDir . '/' . $key;
@@ -136,22 +130,24 @@ class FileCache
     }
 
     /**
-     *
      * @param string $key
+     *
      * @return bool
      */
     public function hasItem($key)
     {
-        return (file_exists($this->cacheDir . '/' . $key));
+        return file_exists($this->cacheDir . '/' . $key);
     }
 
     /**
-     *
      * @param string $key
+     *
      * @return FileCacheItem
+     * @throws \RuntimeException
+     * @throws \LogicException
      */
     public function getItem($key)
     {
-        return new FileCacheItem($key, new SplFileObject($this->cacheDir . '/' . $key));
+        return new FileCacheItem($key, new \SplFileObject($this->cacheDir . '/' . $key));
     }
 }

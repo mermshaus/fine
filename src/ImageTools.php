@@ -2,18 +2,13 @@
 
 namespace mermshaus\fine;
 
-use Exception;
-
-/**
- *
- */
 class ImageTools
 {
     /**
-     *
      * @param string $imagePath
+     *
      * @return resource
-     * @throws Exception
+     * @throws \Exception
      */
     public function loadImage($imagePath)
     {
@@ -21,29 +16,28 @@ class ImageTools
 
         $image = null;
 
-        if (in_array($extension, array('jpg', 'jpeg'))) {
+        if (in_array($extension, ['jpg', 'jpeg'])) {
             $image = imagecreatefromjpeg($imagePath);
             $image = $this->adjustRotation($imagePath, $image);
-        } elseif (in_array($extension, array('png'))) {
+        } elseif (in_array($extension, ['png'])) {
             $image = imagecreatefrompng($imagePath);
-        } elseif (in_array($extension, array('gif'))) {
+        } elseif (in_array($extension, ['gif'])) {
             $image = imagecreatefromgif($imagePath);
         }
 
         if (!is_resource($image)) {
-            throw new Exception(sprintf('Couldn\'t open image in "%s"', $imagePath));
+            throw new \Exception(sprintf('Couldn\'t open image in "%s"', $imagePath));
         }
 
         return $image;
     }
 
     /**
-     *
-     *
      * Only works for JPEG images (?)
      *
-     * @param string $imagePath
+     * @param string   $imagePath
      * @param resource $image
+     *
      * @return resource
      */
     private function adjustRotation($imagePath, $image)
@@ -75,10 +69,10 @@ class ImageTools
     }
 
     /**
-     *
      * @param resource $image
-     * @param int $width
-     * @param int $height
+     * @param int      $width
+     * @param int      $height
+     *
      * @return resource
      */
     public function createThumb($image, $width, $height)
@@ -116,12 +110,12 @@ class ImageTools
     }
 
     /**
-     *
      * @param resource $image
-     * @param int $maxWidth
-     * @param int $maxHeight
+     * @param int      $maxWidth
+     * @param int      $maxHeight
+     * @param bool     $enlarge
+     *
      * @return resource
-     * @throws Exception
      */
     public function scale($image, $maxWidth, $maxHeight, $enlarge = false)
     {

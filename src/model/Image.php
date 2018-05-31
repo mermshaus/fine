@@ -2,12 +2,6 @@
 
 namespace mermshaus\fine\model;
 
-use DateTime;
-use DateTimeZone;
-
-/**
- *
- */
 final class Image
 {
     private $path;
@@ -24,12 +18,11 @@ final class Image
     private $sortDate;
 
     /**
-     *
      * @param string $path
      */
     public function __construct($path)
     {
-        $this->path = $path;
+        $this->path     = $path;
         $this->basename = pathinfo($this->path, PATHINFO_BASENAME);
     }
 
@@ -37,21 +30,22 @@ final class Image
     {
         $this->fileSize     = filesize($this->path);
         $this->creationDate = null;
-        $this->filemdate    = DateTime::createFromFormat('U', filemtime($this->path));
+        $this->filemdate    = \DateTime::createFromFormat('U', filemtime($this->path));
 
         list($this->width, $this->height) = getimagesize($this->path);
 
-        set_error_handler(function () { /* Discard EXIF warnings */ });
+        set_error_handler(function () { /* Discard EXIF warnings */
+        });
         $exifs = exif_read_data($this->path, 'IFD0', true, false);
         restore_error_handler();
 
         if ($exifs !== false) {
             if (isset($exifs['IFD0']['DateTime'])) {
-                $this->creationDate = DateTime::createFromFormat(
+                $this->creationDate = \DateTime::createFromFormat(
                     'Y:m:d H:i:s',
                     $exifs['IFD0']['DateTime'],
                     // @todo Try to determine correct TZ
-                    new DateTimeZone('UTC')
+                    new \DateTimeZone('UTC')
                 );
 
                 if ($this->creationDate === false) {
@@ -74,7 +68,6 @@ final class Image
     }
 
     /**
-     *
      * @return string
      */
     public function getBasename()
@@ -83,7 +76,6 @@ final class Image
     }
 
     /**
-     *
      * @return int
      */
     public function getFileSize()
@@ -96,8 +88,7 @@ final class Image
     }
 
     /**
-     *
-     * @return DateTime
+     * @return \DateTime
      */
     public function getCreationDate()
     {
@@ -109,7 +100,6 @@ final class Image
     }
 
     /**
-     *
      * @return int
      */
     public function getWidth()
@@ -122,7 +112,6 @@ final class Image
     }
 
     /**
-     *
      * @return int
      */
     public function getHeight()
@@ -135,8 +124,7 @@ final class Image
     }
 
     /**
-     *
-     * @return DateTime
+     * @return \DateTime
      */
     public function getFilemdate()
     {
@@ -148,8 +136,7 @@ final class Image
     }
 
     /**
-     *
-     * @return DateTime
+     * @return \DateTime
      */
     public function getSortDate()
     {

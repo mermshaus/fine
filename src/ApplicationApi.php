@@ -2,19 +2,14 @@
 
 namespace mermshaus\fine;
 
-/**
- *
- */
 class ApplicationApi
 {
     /**
-     *
      * @var Application
      */
     private $application;
 
     /**
-     *
      * @param Application $application
      */
     public function __construct(Application $application)
@@ -23,8 +18,8 @@ class ApplicationApi
     }
 
     /**
-     *
      * @param mixed $s
+     *
      * @return string
      */
     public function e($s)
@@ -33,25 +28,26 @@ class ApplicationApi
     }
 
     /**
-     *
      * @param string $action
-     * @param array $params
+     * @param array  $params
+     *
      * @return string
      */
-    public function url($action, array $params = array())
+    public function url($action, array $params = [])
     {
         return $this->application->url($action, $params);
     }
 
     /**
-     *
      * @param string $resourceKey
-     * @return string
+     * @param object $scope
+     *
+     * @throws \Exception
      */
     public function doInclude($resourceKey, $scope)
     {
         $resource = $this->application->getViewScriptManager()->getScript($resourceKey);
-        $bound = $resource->bindTo($scope);
+        $bound    = $resource->bindTo($scope);
 
         $bound();
     }
