@@ -119,7 +119,7 @@ Clean up orphaned cache elements:
 ## Testing
 
 ~~~
-$ phpunit
+$ vendor/bin/phpunit
 ~~~
 
 
