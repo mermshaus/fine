@@ -8,7 +8,7 @@ class ImageTools
      * @param string $imagePath
      *
      * @return resource
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function loadImage($imagePath)
     {
@@ -16,17 +16,23 @@ class ImageTools
 
         $image = null;
 
-        if (in_array($extension, ['jpg', 'jpeg'])) {
+        $extensions[] = [
+            'gif' => ['gif'],
+            'jpg' => ['jpg', 'jpeg'],
+            'png' => ['png'],
+        ];
+
+        if (in_array($extension, $extensions['jpg'], true)) {
             $image = imagecreatefromjpeg($imagePath);
             $image = $this->adjustRotation($imagePath, $image);
-        } elseif (in_array($extension, ['png'])) {
+        } elseif (in_array($extension, $extensions['png'], true)) {
             $image = imagecreatefrompng($imagePath);
-        } elseif (in_array($extension, ['gif'])) {
+        } elseif (in_array($extension, $extensions['gif'], true)) {
             $image = imagecreatefromgif($imagePath);
         }
 
         if (!is_resource($image)) {
-            throw new \Exception(sprintf('Couldn\'t open image in "%s"', $imagePath));
+            throw new \RuntimeException(sprintf('Couldn\'t open image in "%s"', $imagePath));
         }
 
         return $image;

@@ -22,12 +22,12 @@ class ViewScriptManager
      * @param string $key
      *
      * @return \Closure
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function getScript($key)
     {
         if (!isset($this->scripts[$key])) {
-            throw new \Exception(sprintf('Script not found: "%s"', $key));
+            throw new \RuntimeException(sprintf('Script not found: "%s"', $key));
         }
 
         return $this->scripts[$key];

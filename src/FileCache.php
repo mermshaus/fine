@@ -54,7 +54,7 @@ class FileCache
      * @param array $managedCachePrefixes
      *
      * @return int
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function clearUnmanagedItems(array $managedCachePrefixes)
     {
@@ -92,7 +92,7 @@ class FileCache
      * @param array  $keysHashMap
      *
      * @return int
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function clearItemsNotInList($prefix, array $keysHashMap)
     {
@@ -103,7 +103,7 @@ class FileCache
 
             if (!isset($keysHashMap[$pathinfo['basename']])) {
                 if ($pathinfo['extension'] !== 'cache') {
-                    throw new \Exception();
+                    throw new \RuntimeException('Found cache file with invalid file extension');
                 }
                 $this->deleteItem($pathinfo['basename']);
                 $deleteCounter++;
@@ -116,12 +116,12 @@ class FileCache
     /**
      * @param string $key
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function deleteItem($key)
     {
         if (!$this->hasItem($key)) {
-            throw new \Exception(sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key));
+            throw new \RuntimeException(sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key));
         }
 
         $filepath = $this->cacheDir . '/' . $key;

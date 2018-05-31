@@ -42,7 +42,7 @@ class ApplicationApi
      * @param string $resourceKey
      * @param object $scope
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function doInclude($resourceKey, $scope)
     {

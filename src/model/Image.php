@@ -39,20 +39,16 @@ final class Image
         $exifs = exif_read_data($this->path, 'IFD0', true, false);
         restore_error_handler();
 
-        if ($exifs !== false) {
-            if (isset($exifs['IFD0']['DateTime'])) {
-                $this->creationDate = \DateTime::createFromFormat(
-                    'Y:m:d H:i:s',
-                    $exifs['IFD0']['DateTime'],
-                    // @todo Try to determine correct TZ
-                    new \DateTimeZone('UTC')
-                );
+        if ($exifs !== false && isset($exifs['IFD0']['DateTime'])) {
+            $this->creationDate = \DateTime::createFromFormat(
+                'Y:m:d H:i:s',
+                $exifs['IFD0']['DateTime'],
+                // @todo Try to determine correct TZ
+                new \DateTimeZone('UTC')
+            );
 
-                if ($this->creationDate === false) {
-                    #var_dump($exifs['IFD0']['DateTime']);
-                    #exit;
-                    $this->creationDate = null;
-                }
+            if ($this->creationDate === false) {
+                $this->creationDate = null;
             }
         }
 

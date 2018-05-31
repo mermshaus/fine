@@ -38,8 +38,8 @@ final class Config
 
         // Override with config file
 
-        if ($configPath !== null) {
-            // todo
-        }
+        // if ($configPath !== null) {
+        //
+        // }
     }
 }

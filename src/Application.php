@@ -29,7 +29,7 @@ final class Application
     /**
      * @var ApplicationApi
      */
-    private $api = null;
+    private $api;
 
     /**
      * @param Config            $config
@@ -47,16 +47,12 @@ final class Application
 
         $this->cache = $cache;
 
+        // We're not using a type hint here in order to support both PHP 5/7 Exceptions and PHP 7 Throwables
         set_exception_handler(function ($e) {
-            if ($e instanceof \Exception) {
-                header('HTTP/1.1 404 Not Found');
-                header('Content-Type: text/plain; charset=UTF-8');
-                echo $e->getMessage() . "\n";
-            } else {
-                header('HTTP/1.1 404 Not Found');
-                header('Content-Type: text/plain; charset=UTF-8');
-                var_dump($e);
-            }
+            /** @var \Exception|\Throwable $e */
+            header('HTTP/1.1 404 Not Found');
+            header('Content-Type: text/plain; charset=UTF-8');
+            echo $e->getMessage() . "\n";
         });
     }
 
@@ -115,7 +111,7 @@ final class Application
      */
     public function url($action, array $params = [])
     {
-        if (in_array($action, ['album', 'detail', 'image']) && isset($params['album']) && $params['album'] === '') {
+        if (isset($params['album']) && $params['album'] === '' && in_array($action, ['album', 'detail', 'image'])) {
             unset($params['album']);
         }
 
@@ -136,10 +132,16 @@ final class Application
         return $url;
     }
 
+    /**
+     * @param string $file
+     *
+     * @return model\Image
+     * @throws \RuntimeException
+     */
     private function loadImage($file)
     {
         if (!is_readable($file)) {
-            throw new \Exception(sprintf('File %s is not readable.', basename($file)));
+            throw new \RuntimeException(sprintf('File %s is not readable.', basename($file)));
         }
 
         return new model\Image($file);
@@ -149,7 +151,8 @@ final class Application
      * @param string $path
      *
      * @return model\Image[]
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function getImages($path)
     {
@@ -212,7 +215,7 @@ final class Application
     }
 
     /**
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function run()
     {
@@ -221,7 +224,7 @@ final class Application
         $methodName = $action . 'Action';
 
         if (!method_exists($this, $methodName)) {
-            throw new \Exception(sprintf('Unknown action: "%s"', $action));
+            throw new \RuntimeException(sprintf('Unknown action: "%s"', $action));
         }
 
         $ret = $this->$methodName();
@@ -239,13 +242,18 @@ final class Application
         }
     }
 
+    /**
+     * @return View
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
     private function statusAction() // (no parameters)
     {
         $prefixes = ['thumb', 'large'];
 
         $ret = '';
 
-        $ret .= 'Cache is writable: ' . (($this->canUseCache()) ? 'yes' : '**NO**') . "\n\n";
+        $ret .= 'Cache is writable: ' . ($this->canUseCache() ? 'yes' : '**NO**') . "\n\n";
         $ret .= 'Cache prefixes: ' . implode(', ', $prefixes) . "\n\n";
 
         // Clear unmanaged items
@@ -258,7 +266,7 @@ final class Application
 
         $info = [];
 
-        $albums = ($this->isInSingleAlbumMode()) ? [''] : $this->getAlbums();
+        $albums = $this->isInSingleAlbumMode() ? [''] : $this->getAlbums();
 
         $first = true;
 
@@ -284,10 +292,6 @@ final class Application
                 $images = $this->getImages($this->config->albumPath . '/' . $album);
 
                 foreach ($images as $image) {
-                    $width   = 0;
-                    $height  = 0;
-                    $quality = 0;
-
                     if ($prefix === 'thumb') {
                         $width   = $this->config->thumbWidth;
                         $height  = $this->config->thumbHeight;
@@ -297,7 +301,7 @@ final class Application
                         $height  = $this->config->largeHeight;
                         $quality = $this->config->largeQuality;
                     } else {
-                        throw new \Exception(sprintf('Unknown prefix "%s" in status action', $prefix));
+                        throw new \RuntimeException(sprintf('Unknown prefix "%s" in status action', $prefix));
                     }
 
                     $cacheKey = $this->generateCacheKey(
@@ -325,7 +329,7 @@ final class Application
 
             $clearedOrphanedItemsCount = $this->cache->clearItemsNotInList($prefix, $keysHashMap);
 
-            $ret .= $prefix . ": orphaned elements deleted from cache: " . $clearedOrphanedItemsCount . "\n";
+            $ret .= $prefix . ': orphaned elements deleted from cache: ' . $clearedOrphanedItemsCount . "\n";
 
             $first = false;
         }
@@ -345,7 +349,7 @@ final class Application
      * @param string $resourceKey
      *
      * @return array
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     private function loadResource($resourceKey)
     {
@@ -361,12 +365,15 @@ final class Application
         }
 
         if (!array_key_exists($resourceKey, $jsonStore)) {
-            throw new \Exception(sprintf('Unknown resource file "%s"', $resourceKey));
+            throw new \RuntimeException(sprintf('Unknown resource file "%s"', $resourceKey));
         }
 
         return $jsonStore[$resourceKey];
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     private function assetAction() // file
     {
         $file = $this->getGetString('file', '');
@@ -402,20 +409,21 @@ final class Application
     /**
      * @param $album
      *
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function assertValidAlbum($album)
     {
         if (!is_string($album)) {
-            throw new \LogicException();
+            throw new \LogicException('$album must be of type string');
         }
 
-        if ($this->isInSingleAlbumMode() && $album === '') {
+        if ($album === '' && $this->isInSingleAlbumMode()) {
             return;
         }
 
         if (!in_array($album, $this->getAlbums(), true)) {
-            throw new \Exception(sprintf('Unknown album "%s"', $album));
+            throw new \RuntimeException(sprintf('Unknown album "%s"', $album));
         }
     }
 
@@ -423,16 +431,17 @@ final class Application
      * @param string $album
      * @param string $filename
      *
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function assertValidFilename($album, $filename)
     {
         if (!is_string($album)) {
-            throw new \LogicException();
+            throw new \LogicException('$album must be of type string');
         }
 
         if (!is_string($filename)) {
-            throw new \LogicException();
+            throw new \LogicException('$filename must be of type string');
         }
 
         $this->assertValidAlbum($album);
@@ -446,11 +455,11 @@ final class Application
         $normalizedFilePath = realpath($normalizedAlbumPath . '/' . $filename);
 
         if ($normalizedFilePath === false) {
-            throw new \Exception('File does not exist.');
+            throw new \RuntimeException('File does not exist.');
         }
 
         if ($normalizedFilePath !== $normalizedAlbumPath . '/' . $filename) {
-            throw new \Exception('Filename is not normalized.');
+            throw new \RuntimeException('Filename is not normalized.');
         }
 
         if ($normalizedAlbumPath !== pathinfo($normalizedFilePath, PATHINFO_DIRNAME)) {
@@ -458,6 +467,11 @@ final class Application
         }
     }
 
+    /**
+     * @return View
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
     private function detailAction() // album, filename
     {
         $album = $this->getGetString('album');
@@ -519,7 +533,8 @@ final class Application
     }
 
     /**
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function albumAction() // album, page
     {
@@ -528,7 +543,7 @@ final class Application
 
         $activePage = $this->getGetString('page', '1');
         if (preg_match('/\A[1-9][0-9]*\z/', $activePage) === 0) {
-            throw new \Exception('Value for page parameter must be >= 1.');
+            throw new \RuntimeException('Value for page parameter must be >= 1.');
         }
         $activePage = (int) $activePage;
 
@@ -539,7 +554,7 @@ final class Application
         $images = array_slice($images, ($activePage - 1) * $this->config->imagesPerPage, $this->config->imagesPerPage);
 
         if (count($images) === 0) {
-            throw new \Exception('No data for given parameters.');
+            throw new \RuntimeException('No data for given parameters.');
         }
 
         $pagesCount = 0;
@@ -588,7 +603,8 @@ final class Application
 
     /**
      * @return View
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function indexAction() // (no parameters)
     {
@@ -604,7 +620,7 @@ final class Application
             $images = $this->getImages($this->config->albumPath . '/' . $album);
 
             if (count($images) === 0) {
-                throw new \Exception(sprintf(
+                throw new \RuntimeException(sprintf(
                     'Unable to read images from album "%s". Album may be empty or image file permissions may be too restrictive',
                     $album
                 ));
@@ -623,7 +639,8 @@ final class Application
     }
 
     /**
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function randomAction() // album
     {
@@ -715,7 +732,8 @@ final class Application
     }
 
     /**
-     * @throws \Exception
+     * @throws \LogicException
+     * @throws \RuntimeException
      */
     private function imageAction() // album, filename, element
     {
@@ -727,8 +745,12 @@ final class Application
 
         $prefix = $this->getGetString('element');
         if ($prefix !== 'thumb' && $prefix !== 'large') {
-            throw new \Exception('Invalid element.');
+            throw new \RuntimeException('Invalid element.');
         }
+
+        $width   = 0;
+        $height  = 0;
+        $quality = 0;
 
         if ($prefix === 'thumb') {
             $width   = $this->config->thumbWidth;
@@ -771,10 +793,16 @@ final class Application
 
         $localPath = $this->config->albumPath . '/' . $album . '/' . $basename;
 
+        $dstim2 = null;
+
         if ($prefix === 'thumb') {
             $dstim2 = $imageTools->createThumb($imageTools->loadImage($localPath), $width, $height);
         } elseif ($prefix === 'large') {
             $dstim2 = $imageTools->scale($imageTools->loadImage($localPath), $width, $height);
+        }
+
+        if ($dstim2 === null) {
+            throw new \RuntimeException('Unable to set $dstim2');
         }
 
         if ($this->cache->saveFromJpegImage($cacheKey, $dstim2, $quality)) {

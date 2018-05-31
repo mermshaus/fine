@@ -53,8 +53,7 @@ class View
     /**
      * @param string $resourceKey
      *
-     * @return string
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     private function doInclude($resourceKey)
     {
@@ -68,6 +67,16 @@ class View
     public function __set($name, $value)
     {
         $this->values[$name] = $value;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this->values[$name]);
     }
 
     /**
@@ -88,7 +97,7 @@ class View
      * @param array $vars
      *
      * @return string
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function render(array $vars = [])
     {
@@ -102,7 +111,7 @@ class View
     /**
      * @param array $vars
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function output(array $vars = [])
     {
