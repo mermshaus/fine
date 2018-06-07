@@ -16,7 +16,7 @@ class ImageTools
 
         $image = null;
 
-        $extensions[] = [
+        $extensions = [
             'gif' => ['gif'],
             'jpg' => ['jpg', 'jpeg'],
             'png' => ['png'],
