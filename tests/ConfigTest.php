@@ -5,19 +5,16 @@ namespace mermshaus\fine\Tests;
 use mermshaus\fine\Config;
 use PHPUnit_Framework_TestCase;
 
-/**
- *
- */
 class ConfigTest extends PHPUnit_Framework_TestCase
 {
     /**
-     *
+     * @throws \PHPUnit_Framework_Exception
      */
     public function testCreateInstance()
     {
         $obj = new Config();
 
-        $this->assertSame(true, $obj instanceof Config);
+        static::assertInstanceOf('\\mermshaus\\fine\\Config', $obj);
     }
 
     /**
@@ -27,7 +24,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         $obj = new Config();
 
-        $this->assertSame(realpath(__DIR__ . '/../src'), realpath($obj->albumPath));
-        $this->assertSame(realpath(__DIR__ . '/../src/.fine'), realpath($obj->cacheDir));
+        static::assertSame(realpath(__DIR__ . '/../src'), realpath($obj->albumPath));
+        static::assertSame(realpath(__DIR__ . '/../src/.fine'), realpath($obj->cacheDir));
     }
 }

@@ -3,35 +3,24 @@
 
 namespace mermshaus\xfine\generate;
 
-use DateTime;
-use DateTimeZone;
-use Exception;
-use FilterIterator;
-use Iterator;
 use mermshaus\fine\Application;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
 
 require __DIR__ . '/src/Application.php';
 
-/**
- *
- */
-class FileExtensionFilterIterator extends FilterIterator
+/** @noinspection PhpMultipleClassesDeclarationsInOneFile */
+
+final class FileExtensionFilterIterator extends \FilterIterator
 {
     /**
-     *
-     * @var array
+     * @var string[]
      */
-    private $extensionList = array();
+    private $extensionList = [];
 
     /**
-     *
-     * @param Iterator $innerIterator
-     * @param array $extensionList
+     * @param \Iterator $innerIterator
+     * @param string[]  $extensionList
      */
-    public function __construct(Iterator $innerIterator, array $extensionList)
+    public function __construct(\Iterator $innerIterator, array $extensionList)
     {
         parent::__construct($innerIterator);
 
@@ -41,44 +30,44 @@ class FileExtensionFilterIterator extends FilterIterator
     }
 
     /**
-     *
      * @return bool
      */
     public function accept()
     {
         $extension = strtolower($this->current()->getExtension());
 
-        return (isset($this->extensionList[$extension]));
+        return isset($this->extensionList[$extension]);
     }
 }
 
-/**
- *
- */
-class Generator
+/** @noinspection PhpMultipleClassesDeclarationsInOneFile */
+
+final class Generator
 {
     /**
+     * @param string   $path
+     * @param string[] $extensionList
      *
-     * @param string $path
      * @return array
+     * @throws \UnexpectedValueException
      */
     public function getSortedFiles($path, array $extensionList)
     {
-        $rdi = new RecursiveDirectoryIterator(
+        $rdi = new \RecursiveDirectoryIterator(
             $path,
-            RecursiveDirectoryIterator::SKIP_DOTS
+            \RecursiveDirectoryIterator::SKIP_DOTS
         );
 
-        $rii = new RecursiveIteratorIterator(
+        $rii = new \RecursiveIteratorIterator(
             $rdi,
-            RecursiveIteratorIterator::LEAVES_ONLY
+            \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
         $fii = new FileExtensionFilterIterator($rii, $extensionList);
 
         $files = iterator_to_array($fii);
 
-        usort($files, function (SplFileInfo $a, SplFileInfo $b) {
+        usort($files, function (\SplFileInfo $a, \SplFileInfo $b) {
             $da = dirname($a->getRealPath());
             $db = dirname($b->getRealPath());
 
@@ -105,17 +94,17 @@ class Generator
     }
 
     /**
-     *
      * @param string $file
+     *
      * @return string
-     * @throws Exception
+     * @throws \RuntimeException
      */
     public function appendSourceFile($file)
     {
         $data = file_get_contents($file);
 
-        if (substr($data, 0, 5) !== '<?php') {
-            throw new Exception();
+        if (strpos($data, '<?php') !== 0) {
+            throw new \RuntimeException(sprintf('File "%s" does not begin with \'<?php\'', $file));
         }
 
         $data = substr($data, 5);
@@ -124,9 +113,9 @@ class Generator
     }
 
     /**
-     *
      * @param string $file
      * @param string $baseDir
+     *
      * @return string
      */
     public function appendViewFile($file, $baseDir)
@@ -156,9 +145,16 @@ TPL;
         return sprintf($tpl, $key, $data);
     }
 
+    /**
+     * @param string $input
+     * @param string $type
+     *
+     * @return string
+     * @throws \RuntimeException
+     */
     private function operation_minify($input, $type)
     {
-        if (trim(`which yui-compressor`) === '') {
+        if (trim(shell_exec('which yui-compressor')) === '') {
             fwrite(STDERR, "yui-compressor not found. Skipping minify operation\n");
             return $input;
         }
@@ -168,46 +164,46 @@ TPL;
         } elseif ($type === 'text/css') {
             $type = 'css';
         } else {
-            throw new Exception(
+            throw new \RuntimeException(
                 sprintf('Type %s not supported in operation_minify', $type)
             );
         }
 
         $cmd = 'echo ' . escapeshellarg($input) . ' | yui-compressor --type ' . escapeshellarg($type);
 
-        return `$cmd`;
+        return shell_exec($cmd);
     }
 
     /**
-     *
      * @return string
+     * @throws \Exception
      */
     public function getAssetData()
     {
-        $files = array(
-            'jquery-1.12.4.min.js' => array(
-                'type' => 'application/javascript',
-                'path' => __DIR__ . '/assets/jquery-1.12.4.min.js',
-                'operations' => array()
-            ),
-            'jquery.mobile.custom.min.js' => array(
-                'type' => 'application/javascript',
-                'path' => __DIR__ . '/assets/jquery.mobile.custom.min.js',
-                'operations' => array()
-            ),
-            'fine.js' => array(
-                'type' => 'application/javascript',
-                'path' => __DIR__ . '/assets/fine.js',
-                'operations' => array('minify')
-            ),
-            'fine.css' => array(
-                'type' => 'text/css',
-                'path' => __DIR__ . '/assets/fine.css',
-                'operations' => array('minify')
-            )
-        );
+        $files = [
+            'jquery-1.12.4.min.js'        => [
+                'type'       => 'application/javascript',
+                'path'       => __DIR__ . '/assets/jquery-1.12.4.min.js',
+                'operations' => [],
+            ],
+            'jquery.mobile.custom.min.js' => [
+                'type'       => 'application/javascript',
+                'path'       => __DIR__ . '/assets/jquery.mobile.custom.min.js',
+                'operations' => [],
+            ],
+            'fine.js'                     => [
+                'type'       => 'application/javascript',
+                'path'       => __DIR__ . '/assets/fine.js',
+                'operations' => ['minify'],
+            ],
+            'fine.css'                    => [
+                'type'       => 'text/css',
+                'path'       => __DIR__ . '/assets/fine.css',
+                'operations' => ['minify'],
+            ],
+        ];
 
-        $data = array();
+        $data = [];
 
         foreach ($files as $key => $file) {
             $content = file_get_contents($file['path']);
@@ -218,23 +214,22 @@ TPL;
                 }
             }
 
-            $data[$key] = array(
+            $data[$key] = [
                 'type'    => $file['type'],
-                'content' => $content
-            );
+                'content' => $content,
+            ];
         }
 
-        return json_encode($data, JSON_HEX_TAG /*| JSON_PRETTY_PRINT*/);
+        return json_encode($data, JSON_HEX_TAG);
     }
 }
 
+call_user_func(function () {
+    $generator = new Generator();
 
+    $dt = new \DateTime('now', new \DateTimeZone('UTC'));
 
-$generator = new Generator();
-
-$dt = new DateTime('now', new DateTimeZone('UTC'));
-
-$output = sprintf(<<<'EOT'
+    $output = sprintf(<<<'EOT'
 <?php
 /**
  * Fine Image Gallery
@@ -246,7 +241,7 @@ $output = sprintf(<<<'EOT'
  *
  * License: MIT <https://opensource.org/licenses/MIT>
  *
- * Copyright %s Marc Ermshaus <http://www.ermshaus.org>
+ * Copyright 2017-%s Marc Ermshaus <https://www.ermshaus.org/>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -269,16 +264,16 @@ $output = sprintf(<<<'EOT'
 
 
 EOT
-, Application::VERSION,
-$dt->format('Y-m-d H:i:s \\U\\T\\C'),
-$dt->format('Y'));
+        , Application::VERSION,
+        $dt->format('Y-m-d H:i:s \\U\\T\\C'),
+        $dt->format('Y'));
 
-foreach ($generator->getSortedFiles(__DIR__ . '/src', array('php')) as $file) {
-    $output .= $generator->appendSourceFile($file);
-    $output .= "\n\n";
-}
+    foreach ($generator->getSortedFiles(__DIR__ . '/src', ['php']) as $file) {
+        $output .= $generator->appendSourceFile($file);
+        $output .= "\n\n";
+    }
 
-$output .= <<<'EOT'
+    $output .= <<<'EOT'
 namespace mermshaus\fine;
 
 $configPath = (file_exists(__DIR__ . '/fine.json')) ? __DIR__ . '/fine.json' : null;
@@ -289,11 +284,11 @@ $viewScriptManager = new ViewScriptManager();
 
 EOT;
 
-foreach ($generator->getSortedFiles(__DIR__ . '/views', array('phtml')) as $file) {
-    $output .= $generator->appendViewFile($file, __DIR__ . '/views');
-}
+    foreach ($generator->getSortedFiles(__DIR__ . '/views', ['phtml']) as $file) {
+        $output .= $generator->appendViewFile($file, __DIR__ . '/views');
+    }
 
-$output .= <<<'EOT'
+    $output .= <<<'EOT'
 $cache = new FileCache($config->cacheDir);
 
 #$GLOBALS['loadCalls'] = 0;
@@ -308,6 +303,7 @@ __halt_compiler();
 
 EOT;
 
-$output .= $generator->getAssetData() . "\n";
+    $output .= $generator->getAssetData() . "\n";
 
-echo $output;
+    echo $output;
+});

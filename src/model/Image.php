@@ -30,11 +30,12 @@ final class Image
     {
         $this->fileSize     = filesize($this->path);
         $this->creationDate = null;
-        $this->filemdate    = \DateTime::createFromFormat('U', filemtime($this->path));
+        $this->filemdate    = \DateTime::createFromFormat('U', (string) filemtime($this->path));
 
         list($this->width, $this->height) = getimagesize($this->path);
 
-        set_error_handler(function () { /* Discard EXIF warnings */
+        set_error_handler(function () {
+            // Discard EXIF warnings
         });
         $exifs = exif_read_data($this->path, 'IFD0', true, false);
         restore_error_handler();
