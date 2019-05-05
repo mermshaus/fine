@@ -36,16 +36,11 @@ final class Application
      * @param ViewScriptManager $viewScriptManager
      * @param FileCache         $cache
      */
-    public function __construct(
-        Config $config,
-        ViewScriptManager $viewScriptManager,
-        FileCache $cache
-    ) {
-        $this->config = $config;
-
+    public function __construct(Config $config, ViewScriptManager $viewScriptManager, FileCache $cache)
+    {
+        $this->config            = $config;
         $this->viewScriptManager = $viewScriptManager;
-
-        $this->cache = $cache;
+        $this->cache             = $cache;
 
         // We're not using a type hint here in order to support both PHP 5/7 Exceptions and PHP 7 Throwables
         set_exception_handler(function ($e) {
@@ -56,6 +51,9 @@ final class Application
         });
     }
 
+    /**
+     * @return ApplicationApi
+     */
     private function getApi()
     {
         if ($this->api === null) {
@@ -66,7 +64,6 @@ final class Application
     }
 
     /**
-     *
      * @return ViewScriptManager
      */
     public function getViewScriptManager()
@@ -75,7 +72,6 @@ final class Application
     }
 
     /**
-     *
      * @return string
      */
     public function getVersion()
@@ -84,7 +80,6 @@ final class Application
     }
 
     /**
-     *
      * @param string $url
      */
     private function doRedirect($url)
@@ -94,7 +89,6 @@ final class Application
     }
 
     /**
-     *
      * @return bool
      */
     private function isInSingleAlbumMode()
@@ -103,7 +97,6 @@ final class Application
     }
 
     /**
-     *
      * @param string $action
      * @param array  $params
      *
@@ -164,8 +157,13 @@ final class Application
             $images[] = $this->loadImage($file);
         }
 
-        // Sorts by creation date (desc) and filename (asc)
-        usort($images, function (model\Image $a, model\Image $b) {
+        /**
+         * @param model\Image $a
+         * @param model\Image $b
+         *
+         * @return int
+         */
+        $callback = function (model\Image $a, model\Image $b) {
             /*if ($a->sortDate < $b->sortDate) {
                 return 1;
             } elseif ($a->sortDate > $b->sortDate) {
@@ -181,13 +179,16 @@ final class Application
             }
 
             throw new \LogicException('Failed sorting images');
-        });
+        };
+
+        // Sorts by creation date (desc) and filename (asc)
+        usort($images, $callback);
 
         return $images;
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     private function getAlbums()
     {
@@ -407,7 +408,7 @@ final class Application
     }
 
     /**
-     * @param $album
+     * @param string $album
      *
      * @throws \LogicException
      * @throws \RuntimeException
@@ -480,7 +481,11 @@ final class Application
         $filename = $this->getGetString('filename');
         $this->assertValidFilename($album, $filename);
 
-        $imageUrl = $this->url('image', ['album' => $album, 'filename' => $filename, 'element' => 'large']);
+        if (pathinfo($filename, PATHINFO_EXTENSION) === 'gif') {
+            $imageUrl = $this->url('gif', ['album' => $album, 'filename' => $filename]);
+        } else {
+            $imageUrl = $this->url('image', ['album' => $album, 'filename' => $filename, 'element' => 'large']);
+        }
 
         $albumPath = $this->config->albumPath . '/' . $album;
 
@@ -542,6 +547,7 @@ final class Application
         $this->assertValidAlbum($album);
 
         $activePage = $this->getGetString('page', '1');
+        /** @noinspection NotOptimalRegularExpressionsInspection */
         if (preg_match('/\A[1-9][0-9]*\z/', $activePage) === 0) {
             throw new \RuntimeException('Value for page parameter must be >= 1.');
         }
@@ -821,5 +827,22 @@ final class Application
         $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T');
         $this->sendImageHeaders('image/jpeg', $lastModified, null, $prefix . '-' . $basename);
         imagejpeg($dstim2, null, $quality);
+    }
+
+    /**
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
+    private function gifAction() // album, filename
+    {
+        $album = $this->getGetString('album');
+        $this->assertValidAlbum($album);
+
+        $basename = $this->getGetString('filename');
+        $this->assertValidFilename($album, $basename);
+
+        #$lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T');
+        #$this->sendImageHeaders('image/jpeg', $lastModified, null, $prefix . '-' . $basename);
+        readfile(__DIR__ . '/albums/' . $album . '/' . $basename);
     }
 }
