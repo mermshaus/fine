@@ -58,31 +58,10 @@ abstract class AbstractViewModel
     }
 
     /**
-     * @param array $vars
-     *
-     * @return string
      * @throws \RuntimeException
      */
-    public function render(array $vars = [])
+    public function output()
     {
-        ob_start();
-
-        $this->output($vars);
-
-        return ob_get_clean();
-    }
-
-    /**
-     * @param array $vars
-     *
-     * @throws \RuntimeException
-     */
-    public function output(array $vars = [])
-    {
-        foreach ($vars as $key => $value) {
-            $this->$key = $value;
-        }
-
         $this->doInclude($this->script);
     }
 }
