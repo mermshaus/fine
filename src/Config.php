@@ -26,11 +26,11 @@ final class Config
     {
         // Default values
 
-        $this->albumPath       = __DIR__;
+        $this->albumPath       = getcwd();
         $this->singleAlbumMode = true;
 
-        if (is_dir(__DIR__ . '/albums')) {
-            $this->albumPath       = __DIR__ . '/albums';
+        if (is_dir($this->albumPath . '/albums')) {
+            $this->albumPath       .= '/albums';
             $this->singleAlbumMode = false;
         }
 
