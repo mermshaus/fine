@@ -22,10 +22,8 @@ final class ViewModelLayout extends AbstractViewModel
     private $appVersion;
 
     /**
-     * ViewModelLayout constructor.
-     *
      * @param ApplicationApi    $api
-     * @param                $script
+     * @param string            $script
      * @param AbstractViewModel $contentView
      * @param string            $htmlId
      * @param string            $appVersion
