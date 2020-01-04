@@ -1,8 +1,10 @@
 <?php
 
-namespace mermshaus\fine;
+namespace mermshaus\fine\model;
 
-class View
+use mermshaus\fine\ApplicationApi;
+
+abstract class AbstractViewModel
 {
     /**
      * @var ApplicationApi
@@ -13,11 +15,6 @@ class View
      * @var string
      */
     private $script;
-
-    /**
-     * @var array
-     */
-    private $values = [];
 
     /**
      * @param ApplicationApi $api
@@ -58,39 +55,6 @@ class View
     private function doInclude($resourceKey)
     {
         $this->api->doInclude($resourceKey, $this);
-    }
-
-    /**
-     * @param string $name
-     * @param mixed  $value
-     */
-    public function __set($name, $value)
-    {
-        $this->values[$name] = $value;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function __isset($name)
-    {
-        return isset($this->values[$name]);
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (!isset($this->values[$name])) {
-            return null;
-        }
-
-        return $this->values[$name];
     }
 
     /**

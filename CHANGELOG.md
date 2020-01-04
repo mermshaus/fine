@@ -7,6 +7,14 @@
 
 - Comprehensible error message when album without accessible image files is
   present.
+  
+### Changed
+
+- Ignore empty directories in albums.
+  
+### Fixed
+
+- Fix closing `<table>` tag in status view.
 
 
 ## [0.5.0] - 2017-04-17

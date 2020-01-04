@@ -1,10 +1,10 @@
 <?php
 
-if ($this->html_id === null) {
-    $this->html_id = '';
-}
+/** @var \mermshaus\fine\model\ViewModelLayout $this */
 
-$versionString = $this->appVersion . '-' . filemtime(__FILE__);
+$htmlId = ($this->getHtmlId() === null) ? '' : $this->getHtmlId();
+
+$versionString = $this->getAppVersion() . '-' . filemtime(__FILE__);
 
 $scripts = array(
     'jquery-1.12.4.min.js',
@@ -25,7 +25,7 @@ $stylesHtml = sprintf('<link href="%s" rel="stylesheet">',
 );
 
 ?><!DOCTYPE html>
-<html lang="en"<?=($this->html_id !== '') ? ' id="' . $this->e($this->html_id) . '"' : '';?>>
+<html lang="en"<?=($htmlId !== '') ? ' id="' . $this->e($htmlId) . '"' : '';?>>
 <head>
     <meta charset="utf-8">
     <title>Fine Image Gallery</title>
@@ -35,13 +35,13 @@ $stylesHtml = sprintf('<link href="%s" rel="stylesheet">',
     <?=$stylesHtml?>
 </head>
 <body>
-    <?php $this->contentView->output(); ?>
+    <?php $this->getContentView()->output(); ?>
 
-    <?php if ($this->html_id === 'page-index' || $this->html_id === 'page-album'): ?>
+    <?php if ($htmlId === 'page-index' || $htmlId === 'page-album'): ?>
         <div id="fine-logo">
             <p>
                 <span class="fine-logo-title"><a href="https://github.com/mermshaus/fine/releases">ﬁne image gallery</a></span><br>
-                <span class="fine-logo-version">v<?=$this->e($this->appVersion)?></span><br>
+                <span class="fine-logo-version">v<?=$this->e($this->getAppVersion())?></span><br>
             </p>
         </div>
         <div id="fine-scrolltop" data-action="navigation-scrolltop" class="active-javascript">↑</div>

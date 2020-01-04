@@ -1,5 +1,7 @@
 <?php
 
+/** @var \mermshaus\fine\model\ViewModelStatus $this */
+
 $f = function ($s) {
     if ($s > 0) {
         return $this->e($s);
@@ -22,18 +24,18 @@ $sums = array(
     'cache' => array()
 );
 
-foreach ($this->prefixes as $prefix) {
+foreach ($this->getPrefixes() as $prefix) {
     $sums['cache'][$prefix] = array(
         'count' => 0,
         'size'  => 0
     );
 }
 
-foreach ($this->info as $data) {
+foreach ($this->getInfo() as $data) {
     $sums['count'] += $data['count'];
     $sums['size']  += $data['size'];
 
-    foreach ($this->prefixes as $prefix) {
+    foreach ($this->getPrefixes() as $prefix) {
         $sums['cache'][$prefix]['count'] += $data['cache'][$prefix]['count'];
         $sums['cache'][$prefix]['size']  += $data['cache'][$prefix]['size'];
     }
@@ -47,34 +49,34 @@ foreach ($this->info as $data) {
 
 <div class="ui-content">
 
-<pre><?=$this->e($this->output)?></pre>
+<pre><?=$this->e($this->getOutput())?></pre>
 
 <table>
     <tr>
         <th rowspan="3">Album</th>
         <th rowspan="3">Images</th>
         <th rowspan="3">size</th>
-        <th colspan="<?=(count($this->prefixes) * 2)?>">Cache</th>
+        <th colspan="<?=(count($this->getPrefixes()) * 2)?>">Cache</th>
     </tr>
     <tr>
-        <?php foreach ($this->prefixes as $prefix): ?>
+        <?php foreach ($this->getPrefixes() as $prefix): ?>
             <th colspan="2"><?=$this->e($prefix)?></th>
         <?php endforeach; ?>
     </tr>
     <tr>
-        <?php foreach ($this->prefixes as $prefix): ?>
+        <?php foreach ($this->getPrefixes() as $prefix): ?>
             <th>count</th>
             <th>size</th>
         <?php endforeach; ?>
     </tr>
 
-<?php foreach ($this->info as $album => $data): ?>
+<?php foreach ($this->getInfo() as $album => $data): ?>
 
 <tr>
     <td><a href="<?=$this->e($this->url('album', array('album' => $album)))?>"><?=$this->e(($album !== '') ? $album : 'link')?></a></td>
     <td class="text-right"><?=$f($data['count'])?></td>
     <td class="text-right"><?=$formatFileSize($data['size'])?></td>
-    <?php foreach ($this->prefixes as $prefix): ?>
+    <?php foreach ($this->getPrefixes() as $prefix): ?>
         <td class="text-right"><?=$f($data['cache'][$prefix]['count'])?></td>
         <td class="text-right"><?=$formatFileSize($data['cache'][$prefix]['size'])?></td>
     <?php endforeach; ?>
@@ -86,12 +88,12 @@ foreach ($this->info as $data) {
     <td class="text-right">&sum;</td>
     <td class="text-right"><?=$f($sums['count'])?></td>
     <td class="text-right"><?=$formatFileSize($sums['size'])?></td>
-    <?php foreach ($this->prefixes as $prefix): ?>
+    <?php foreach ($this->getPrefixes() as $prefix): ?>
         <td class="text-right"><?=$f($sums['cache'][$prefix]['count'])?></td>
         <td class="text-right"><?=$formatFileSize($sums['cache'][$prefix]['size'])?></td>
     <?php endforeach; ?>
 </tr>
 
-<table>
+</table>
 
 </div>

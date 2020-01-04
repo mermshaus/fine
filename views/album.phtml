@@ -1,21 +1,27 @@
-<?php if (!$this->singleAlbumMode || $this->pagesCount > 1): ?>
+<?php
+
+/** @var \mermshaus\fine\model\ViewModelAlbum $this */
+
+?>
+
+<?php if (!$this->getIsInSingleAlbumMode() || $this->getPagesCount() > 1): ?>
 <div class="ui-controls">
-    <?php if (!$this->singleAlbumMode): ?>
-    <a data-action="navigation-up" href="<?=$this->e($this->url('index'))?>">← <?=$this->e($this->album)?></a>
+    <?php if (!$this->getIsInSingleAlbumMode()): ?>
+    <a data-action="navigation-up" href="<?=$this->e($this->url('index'))?>">← <?=$this->e($this->getAlbum())?></a>
     <?php endif; ?>
 
-        <?php if ($this->imagesCount > 1 || true) : ?>
-        <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->album)))?>">rand</a>
+        <?php if ($this->getImagesCount() > 1 || true) : ?>
+        <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->getAlbum())))?>">rand</a>
         <?php endif; ?>
 
-         <!--(<?=$this->e($this->imagesCount)?>)-->
-    <?php if ($this->pagesCount > 1): ?>
-        <?php for ($i = 1; $i <= $this->pagesCount; $i++): ?>
+         <!--(<?=$this->e($this->getImagesCount())?>)-->
+    <?php if ($this->getPagesCount() > 1): ?>
+        <?php for ($i = 1; $i <= $this->getPagesCount(); $i++): ?>
             <?php
             $params = array();
 
-            if ($this->album !== '') {
-                $params['album'] = $this->album;
+            if ($this->getAlbum() !== '') {
+                $params['album'] = $this->getAlbum();
             }
 
             if ($i > 1) {
@@ -23,12 +29,12 @@
             }
 
             $link   = $this->url('album', $params);
-            $active = ($i === $this->activePage) ? ' class="active"' : '';
+            $active = ($i === $this->getActivePage()) ? ' class="active"' : '';
             $linkId = '';
             $foo    = array();
 
-            if ($i === $this->nextPageNumber)     { $foo[] = 'navigation-next';     }
-            if ($i === $this->previousPageNumber) { $foo[] = 'navigation-previous'; }
+            if ($i === $this->getNextPageNumber())     { $foo[] = 'navigation-next';     }
+            if ($i === $this->getPreviousPageNumber()) { $foo[] = 'navigation-previous'; }
             if (count($foo) > 0) { $linkId = ' data-action="' . implode(' ', $foo) . '"'; }
             ?>
             <a<?=$linkId?><?=$active?> href="<?=$this->e($link)?>"><?=$i?></a>
@@ -40,15 +46,15 @@
 <div class="ui-content cf">
     <?php $first = true; ?>
     <ul>
-    <?php foreach ($this->images as $bild) : ?>
+    <?php foreach ($this->getImages() as $bild) : ?>
         <?php
         $webPath1 = $this->url('detail', array(
-            'album'    => $this->album,
+            'album'    => $this->getAlbum(),
             'filename' => $bild->getBasename()
         ));
 
         $webPath = $this->url('image', array(
-            'album'    => $this->album,
+            'album'    => $this->getAlbum(),
             'filename' => $bild->getBasename(),
             'element'  => 'thumb'
         ));

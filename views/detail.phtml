@@ -1,12 +1,15 @@
 <?php
-$params = array();
 
-if ($this->album !== '') {
-    $params['album'] = $this->album;
+/** @var \mermshaus\fine\model\ViewModelDetail $this */
+
+$params = [];
+
+if ($this->getAlbum() !== '') {
+    $params['album'] = $this->getAlbum();
 }
 
-if ($this->page > 1) {
-    $params['page'] = $this->page;
+if ($this->getPage() > 1) {
+    $params['page'] = $this->getPage();
 }
 
 $url = $this->url('album', $params);
@@ -15,30 +18,31 @@ $url = $this->url('album', $params);
 <div class="ui-controls-wrapper">
     <div class="ui-controls">
 
-        <a data-action="navigation-up" href="<?=$this->e($url)?>">
-            ← <?=$this->e($this->filename)?>
-            (<?=$this->e($this->i + 1)?>/<?=$this->e(count($this->images))?>)
+        <a data-action="navigation-up" href="<?= $this->e($url) ?>">
+            ← <?= $this->e($this->getFilename()) ?>
+            (<?= $this->e($this->getI() + 1) ?>/<?= $this->e(count($this->getImages())) ?>)
         </a>
 
-        <?php if (count($this->images) > 1): ?>
-            <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->album)))?>">rand</a>
+        <?php if (count($this->getImages()) > 1): ?>
+            <a data-action="navigation-random" id="navigation-random"
+               href="<?= $this->e($this->url('random', ['album' => $this->getAlbum()])) ?>">rand</a>
         <?php endif; ?>
 
     </div>
 </div>
 
 <div class="detail-container">
-    <img class="detail-image" src="<?=$this->e($this->imageUrl)?>" title="<?=$this->e($this->filename)?>">
+    <img class="detail-image" src="<?= $this->e($this->getImageUrl()) ?>" title="<?= $this->e($this->getFilename()) ?>">
 
-    <?php if ($this->prevImageUrl !== ''): ?>
+    <?php if ($this->getPrevImageUrl() !== ''): ?>
         <div class="navigation-previous">
-            <a data-action="navigation-previous" href="<?=$this->e($this->prevImageUrl)?>"><span>←</span></a>
+            <a data-action="navigation-previous" href="<?= $this->e($this->getPrevImageUrl()) ?>"><span>←</span></a>
         </div>
     <?php endif; ?>
 
-    <?php if ($this->nextImageUrl !== ''): ?>
+    <?php if ($this->getNextImageUrl() !== ''): ?>
         <div class="navigation-next">
-            <a data-action="navigation-next" href="<?=$this->e($this->nextImageUrl)?>"><span>→</span></a>
+            <a data-action="navigation-next" href="<?= $this->e($this->getNextImageUrl()) ?>"><span>→</span></a>
         </div>
     <?php endif; ?>
 </div>

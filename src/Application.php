@@ -3,6 +3,11 @@
 namespace mermshaus\fine;
 
 use mermshaus\fine\model;
+use mermshaus\fine\model\AbstractViewModel;
+use mermshaus\fine\model\ViewModelAlbum;
+use mermshaus\fine\model\ViewModelIndex;
+use mermshaus\fine\model\ViewModelLayout;
+use mermshaus\fine\model\ViewModelStatus;
 
 final class Application
 {
@@ -204,13 +209,20 @@ final class Application
             $tmp = basename($p);
 
             if ($tmp !== '.fine') {
+                $images = $this->getImages($this->config->albumPath . '/' . $tmp);
+
+                if (count($images) === 0) {
+                    continue;
+                }
+
                 $albums[] = $tmp;
             }
         }
 
-        usort($albums, function ($a, $b) {
-            return strcasecmp($a, $b);
-        });
+        usort($albums,
+            function ($a, $b) {
+                return strcasecmp($a, $b);
+            });
 
         return $albums;
     }
@@ -230,21 +242,23 @@ final class Application
 
         $ret = $this->$methodName();
 
-        if ($ret instanceof View) {
+        if ($ret instanceof AbstractViewModel) {
             header('Content-Type: text/html; charset=utf-8');
 
-            $layout = new View($this->getApi(), 'layout');
+            $viewModelLayout = new ViewModelLayout(
+                $this->getApi(),
+                'layout',
+                $ret,
+                'page-' . $action,
+                $this->getVersion()
+            );
 
-            $layout->contentView = $ret;
-            $layout->html_id     = 'page-' . $action;
-            $layout->appVersion  = $this->getVersion();
-
-            $layout->output();
+            $viewModelLayout->output();
         }
     }
 
     /**
-     * @return View
+     * @return AbstractViewModel
      * @throws \LogicException
      * @throws \RuntimeException
      */
@@ -335,13 +349,9 @@ final class Application
             $first = false;
         }
 
-        $view = new View($this->getApi(), 'status');
+        $viewModelStatus = new ViewModelStatus($this->getApi(), 'status', $prefixes, $ret, $info);
 
-        $view->prefixes = $prefixes;
-        $view->output   = $ret;
-        $view->info     = $info;
-
-        return $view;
+        return $viewModelStatus;
     }
 
     /**
@@ -469,7 +479,7 @@ final class Application
     }
 
     /**
-     * @return View
+     * @return AbstractViewModel
      * @throws \LogicException
      * @throws \RuntimeException
      */
@@ -512,7 +522,8 @@ final class Application
             if ($i - 1 >= 0) {
                 $prevImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[$i - 1]->getBasename()]);
             } else {
-                $prevImageUrl = $this->url('detail', ['album' => $album, 'filename' => $images[count($images) - 1]->getBasename()]);
+                $prevImageUrl = $this->url('detail',
+                    ['album' => $album, 'filename' => $images[count($images) - 1]->getBasename()]);
             }
 
             if ($i + 1 < count($images)) {
@@ -522,19 +533,21 @@ final class Application
             }
         }
 
-        $view = new View($this->getApi(), 'detail');
+        $viewModelDetail = new model\ViewModelDetail(
+            $this->getApi(),
+            'detail',
+            $album,
+            $i,
+            $imageUrl,
+            $images,
+            $image,
+            $prevImageUrl,
+            $nextImageUrl,
+            $page,
+            $filename
+        );
 
-        $view->album        = $album;
-        $view->i            = $i;
-        $view->imageUrl     = $imageUrl;
-        $view->images       = $images;
-        $view->image        = $image;
-        $view->prevImageUrl = $prevImageUrl;
-        $view->nextImageUrl = $nextImageUrl;
-        $view->page         = $page;
-        $view->filename     = $filename;
-
-        return $view;
+        return $viewModelDetail;
     }
 
     /**
@@ -577,18 +590,20 @@ final class Application
             $nextPageNumber     = ($activePage + 1 <= $pagesCount) ? $activePage + 1 : 1;
         }
 
-        $view = new View($this->getApi(), 'album');
+        $viewModelAlbum = new ViewModelAlbum(
+            $this->getApi(),
+            'album',
+            $album,
+            $activePage,
+            $images,
+            $imagesCount,
+            $pagesCount,
+            $previousPageNumber,
+            $nextPageNumber,
+            $this->isInSingleAlbumMode()
+        );
 
-        $view->album              = $album;
-        $view->activePage         = $activePage;
-        $view->images             = $images;
-        $view->imagesCount        = $imagesCount;
-        $view->pagesCount         = $pagesCount;
-        $view->previousPageNumber = $previousPageNumber;
-        $view->nextPageNumber     = $nextPageNumber;
-        $view->singleAlbumMode    = $this->isInSingleAlbumMode();
-
-        return $view;
+        return $viewModelAlbum;
     }
 
     /**
@@ -608,7 +623,7 @@ final class Application
     }
 
     /**
-     * @return View
+     * @return AbstractViewModel
      * @throws \LogicException
      * @throws \RuntimeException
      */
@@ -635,13 +650,9 @@ final class Application
             $coverImages[$album] = $images[0];
         }
 
-        $view = new View($this->getApi(), 'index');
+        $viewModelIndex = new ViewModelIndex($this->getApi(), 'index', $albums, $coverImages, $this->canUseCache());
 
-        $view->albums      = $albums;
-        $view->coverImages = $coverImages;
-        $view->canUseCache = $this->canUseCache();
-
-        return $view;
+        return $viewModelIndex;
     }
 
     /**
@@ -819,7 +830,10 @@ final class Application
             $file      = $cacheItem->get();
 
             $lastModified = gmdate('D, d M Y H:i:s \\G\\M\\T', $file->getMTime());
-            $this->sendImageHeaders('image/jpeg', $lastModified, $this->generateETag($cacheItem), $prefix . '-' . $basename);
+            $this->sendImageHeaders('image/jpeg',
+                $lastModified,
+                $this->generateETag($cacheItem),
+                $prefix . '-' . $basename);
             $file->fpassthru();
             return;
         }

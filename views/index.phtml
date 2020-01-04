@@ -1,22 +1,28 @@
+<?php
+
+/** @var $this \mermshaus\fine\model\ViewModelIndex */
+
+?>
 <div class="ui-content">
 
-<?php if (count($this->albums) === 0): ?>
-    <p>No albums found. Please check your config.</p>
-<?php else: ?>
-    <ul class="cf">
-    <?php foreach ($this->albums as $album): ?>
-        <?php
-        $url = $this->url('album', array('album' => $album));
-        $thumbUrl = $this->url('image', array('album' => $album, 'filename' => $this->coverImages[$album]->getBasename(), 'element' => 'thumb'));
-        ?>
-        <li>
-            <a href="<?=$this->e($url)?>">
-                <img src="<?=$this->e($thumbUrl)?>" alt="<?=$this->e('Preview image for album "' . $album . '"')?>">
-                <span><?=$this->e($album)?></span>
-            </a>
-        </li>
-    <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
+    <?php if (count($this->getAlbums()) === 0): ?>
+        <p>No albums found. Please check your config.</p>
+    <?php else: ?>
+        <ul class="cf">
+            <?php foreach ($this->getAlbums() as $album): ?>
+                <?php
+                $url      = $this->url('album', ['album' => $album]);
+                $thumbUrl = $this->url('image', ['album' => $album, 'filename' => $this->getCoverImages()[$album]->getBasename(), 'element' => 'thumb']);
+                ?>
+                <li>
+                    <a href="<?= $this->e($url) ?>">
+                        <img src="<?= $this->e($thumbUrl) ?>"
+                             alt="<?= $this->e('Preview image for album "' . $album . '"') ?>">
+                        <span><?= $this->e($album) ?></span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
 
 </div>
