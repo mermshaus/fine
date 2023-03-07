@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -eu
 
@@ -9,7 +9,7 @@ fine_dir="fine-${version}"
 
 build_dir="./build/release"
 
-
+echo "Building fine ${version} in ${build_dir}"
 
 if [ -d "${build_dir}" ];
 then
@@ -21,7 +21,7 @@ mkdir -p "${build_dir}"
 php -f ./generate > "${build_dir}/index.php"
 php -l "${build_dir}/index.php" 1>/dev/null
 
-vendor/bin/phpunit
+vendor/bin/phpunit 1>/dev/null
 
 cp README.md "${build_dir}"
 
@@ -51,7 +51,5 @@ chmod 0644 "${fine_dir}.zip.sha256sum"
 sha256sum --quiet -c "${fine_dir}.zip.sha256sum"
 
 rm -r "${fine_dir}"
-
-cd ../..
 
 echo "Build successful"
