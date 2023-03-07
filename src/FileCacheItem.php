@@ -1,41 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
-class FileCacheItem
+final class FileCacheItem
 {
-    /**
-     * @var string
-     */
-    private $key;
+    private string $key;
 
-    /**
-     * @var mixed
-     */
-    private $value;
+    private mixed $value;
 
-    /**
-     * @param string $key
-     * @param mixed $value
-     */
-    public function __construct($key, $value)
+    public function __construct(string $key, mixed $value)
     {
-        $this->key   = $key;
+        $this->key = $key;
         $this->value = $value;
     }
 
-    /**
-     * @return string
-     */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
 
-    /**
-     * @return mixed
-     */
-    public function get()
+    public function get(): mixed
     {
         return $this->value;
     }

@@ -1,66 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
+use RuntimeException;
 
 abstract class AbstractViewModel
 {
-    /**
-     * @var ApplicationApi
-     */
-    private $api;
+    private ApplicationApi $api;
 
-    /**
-     * @var string
-     */
-    private $script;
+    private string $script;
 
-    /**
-     * @param ApplicationApi $api
-     * @param string         $script
-     */
-    public function __construct(ApplicationApi $api, $script)
+    public function __construct(ApplicationApi $api, string $script)
     {
-        $this->api    = $api;
+        $this->api = $api;
         $this->script = $script;
     }
 
-    /**
-     * @param mixed $s
-     *
-     * @return string
-     */
-    public function e($s)
+    public function e(mixed $s): string
     {
         return $this->api->e($s);
     }
 
-    /**
-     * @param string $action
-     * @param array  $params
-     *
-     * @return string
-     */
-    public function url($action, array $params = [])
+    public function url(string $action, array $params = []): string
     {
         return $this->api->url($action, $params);
     }
 
     /**
-     * @param string $resourceKey
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    private function doInclude($resourceKey)
+    private function doInclude(string $resourceKey): void
     {
         $this->api->doInclude($resourceKey, $this);
     }
 
     /**
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function output()
+    public function output(): void
     {
         $this->doInclude($this->script);
     }

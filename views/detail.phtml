@@ -12,7 +12,7 @@ if ($this->getPage() > 1) {
     $params['page'] = $this->getPage();
 }
 
-$url = $this->url('album', $params);
+$url = $this->url('index', ['path'=> $this->getAlbum()]);
 ?>
 
 <div class="ui-controls-wrapper">

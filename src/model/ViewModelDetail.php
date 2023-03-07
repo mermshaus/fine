@@ -1,163 +1,98 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
 
 final class ViewModelDetail extends AbstractViewModel
 {
-    /**
-     * @var string
-     */
-    private $album;
+    private string $album;
 
-    /**
-     * @var int
-     */
-    private $i;
+    private int $i;
 
-    /**
-     * @var string
-     */
-    private $imageUrl;
+    private string $imageUrl;
 
-    /**
-     * @var array
-     */
-    private $images;
+    private array $images;
 
-    /**
-     * @var Image
-     */
-    private $image;
+    private ?Image $image;
 
-    /**
-     * @var string
-     */
-    private $prevImageUrl;
+    private string $prevImageUrl;
 
-    /**
-     * @var string
-     */
-    private $nextImageUrl;
+    private string $nextImageUrl;
 
-    /**
-     * @var int
-     */
-    private $page;
+    private int $page;
 
-    /**
-     * @var string
-     */
-    private $filename;
+    private string $filename;
 
-    /**
-     * @param ApplicationApi $api
-     * @param string         $script
-     * @param string         $album
-     * @param int            $i
-     * @param string         $imageUrl
-     * @param array          $images
-     * @param Image          $image
-     * @param string         $prevImageUrl
-     * @param string         $nextImageUrl
-     * @param int            $page
-     * @param string         $filename
-     */
     public function __construct(
         ApplicationApi $api,
-        $script,
-        $album,
-        $i,
-        $imageUrl,
+        string $script,
+        string $album,
+        int $i,
+        string $imageUrl,
         array $images,
-        Image $image,
-        $prevImageUrl,
-        $nextImageUrl,
-        $page,
-        $filename
+        ?Image $image,
+        string $prevImageUrl,
+        string $nextImageUrl,
+        int $page,
+        string $filename
     ) {
         parent::__construct($api, $script);
 
-        $this->album        = $album;
-        $this->i            = $i;
-        $this->imageUrl     = $imageUrl;
-        $this->images       = $images;
-        $this->image        = $image;
+        $this->album = $album;
+        $this->i = $i;
+        $this->imageUrl = $imageUrl;
+        $this->images = $images;
+        $this->image = $image;
         $this->prevImageUrl = $prevImageUrl;
         $this->nextImageUrl = $nextImageUrl;
-        $this->page         = $page;
-        $this->filename     = $filename;
+        $this->page = $page;
+        $this->filename = $filename;
     }
 
-    /**
-     * @return string
-     */
-    public function getAlbum()
+    public function getAlbum(): string
     {
         return $this->album;
     }
 
-    /**
-     * @return int
-     */
-    public function getI()
+    public function getI(): int
     {
         return $this->i;
     }
 
-    /**
-     * @return string
-     */
-    public function getImageUrl()
+    public function getImageUrl(): string
     {
         return $this->imageUrl;
     }
 
-    /**
-     * @return array
-     */
-    public function getImages()
+    public function getImages(): array
     {
         return $this->images;
     }
 
-    /**
-     * @return Image
-     */
-    public function getImage()
+    public function getImage(): ?Image
     {
         return $this->image;
     }
 
-    /**
-     * @return string
-     */
-    public function getPrevImageUrl()
+    public function getPrevImageUrl(): string
     {
         return $this->prevImageUrl;
     }
 
-    /**
-     * @return string
-     */
-    public function getNextImageUrl()
+    public function getNextImageUrl(): string
     {
         return $this->nextImageUrl;
     }
 
-    /**
-     * @return int
-     */
-    public function getPage()
+    public function getPage(): int
     {
         return $this->page;
     }
 
-    /**
-     * @return string
-     */
-    public function getFilename()
+    public function getFilename(): string
     {
         return $this->filename;
     }

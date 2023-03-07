@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
@@ -7,56 +9,40 @@ use mermshaus\fine\ApplicationApi;
 final class ViewModelStatus extends AbstractViewModel
 {
     /**
-     * @var array
+     * @var array<string>
      */
-    private $prefixes;
+    private array $prefixes;
+
+    private string $output;
+
+    private array $info;
 
     /**
-     * @var string
+     * @param array<string> $prefixes
      */
-    private $output;
-
-    /**
-     * @var array
-     */
-    private $info;
-
-    /**
-     * @param ApplicationApi $api
-     * @param string         $script
-     * @param array          $prefixes
-     * @param string         $output
-     * @param array          $info
-     */
-    public function __construct(ApplicationApi $api, $script, array $prefixes, $output, array $info)
+    public function __construct(ApplicationApi $api, string $script, array $prefixes, string $output, array $info)
     {
         parent::__construct($api, $script);
 
         $this->prefixes = $prefixes;
-        $this->output   = $output;
-        $this->info     = $info;
+        $this->output = $output;
+        $this->info = $info;
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
-    public function getPrefixes()
+    public function getPrefixes(): array
     {
         return $this->prefixes;
     }
 
-    /**
-     * @return string
-     */
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->output;
     }
 
-    /**
-     * @return array
-     */
-    public function getInfo()
+    public function getInfo(): array
     {
         return $this->info;
     }

@@ -1,45 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
 final class Config
 {
-    public $albumPath;
-    public $cacheDir;
+    public string $albumPath;
+    public string $cacheDir;
 
-    public $singleAlbumMode;
+    public bool $singleAlbumMode;
 
-    public $thumbWidth   = 240;
-    public $thumbHeight  = 240;
-    public $thumbQuality = 75;
+    public int $thumbWidth = 240;
+    public int $thumbHeight = 240;
+    public int $thumbQuality = 75;
 
-    public $largeWidth   = 1920;
-    public $largeHeight  = 1920;
-    public $largeQuality = 75;
+    public int $largeWidth = 1920;
+    public int $largeHeight = 1920;
+    public int $largeQuality = 75;
 
-    /**
-     * @var int
-     */
-    public $imagesPerPage = 120;
+    public int $imagesPerPage = 120;
 
-    public function __construct($configPath = null)
+    public function __construct()
     {
-        // Default values
-
-        $this->albumPath       = getcwd();
+        $this->albumPath = getcwd();
         $this->singleAlbumMode = true;
 
         if (is_dir($this->albumPath . '/albums')) {
-            $this->albumPath       .= '/albums';
+            $this->albumPath .= '/albums';
             $this->singleAlbumMode = false;
         }
 
         $this->cacheDir = $this->albumPath . '/.fine';
-
-        // Override with config file
-
-        // if ($configPath !== null) {
-        //
-        // }
     }
 }

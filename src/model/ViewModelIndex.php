@@ -1,63 +1,63 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
 
 final class ViewModelIndex extends AbstractViewModel
 {
-    /**
-     * @var array
-     */
-    private $albums;
+    private string $path;
 
-    /**
-     * @var array
-     */
-    private $coverImages;
+    private array $navigation;
 
-    /**
-     * @var bool
-     */
-    private $canUseCache;
+    private array $elements;
 
-    /**
-     * @param ApplicationApi $applicationApi
-     * @param string         $script
-     * @param array          $albums
-     * @param array          $coverImages
-     * @param bool           $canUseCache
-     */
-    public function __construct(ApplicationApi $applicationApi, $script, array $albums, array $coverImages, $canUseCache)
-    {
+    private bool $canUseCache;
+
+    private string $pageTitle;
+
+    public function __construct(
+        ApplicationApi $applicationApi,
+        string $script,
+        string $path,
+        array $navigation,
+        array $elements,
+        bool $canUseCache,
+        string $pageTitle
+    ) {
         parent::__construct($applicationApi, $script);
 
-        $this->albums      = $albums;
-        $this->coverImages = $coverImages;
+        $this->path = $path;
+        $this->navigation = $navigation;
+        $this->elements = $elements;
         $this->canUseCache = $canUseCache;
+        $this->pageTitle = $pageTitle;
     }
 
-    /**
-     * @return array
-     */
-    public function getAlbums()
+    public function getNavigation(): array
     {
-        return $this->albums;
+        return $this->navigation;
     }
 
-    /**
-     * @return array
-     */
-    public function getCoverImages()
+    public function getPath(): string
     {
-        return $this->coverImages;
+        return $this->path;
     }
 
-    /**
-     * @return bool
-     */
-    public function getCanUseCache()
+    public function getElements(): array
+    {
+        return $this->elements;
+    }
+
+    public function getCanUseCache(): bool
     {
         return $this->canUseCache;
+    }
+
+    public function getPageTitle(): string
+    {
+        return $this->pageTitle;
     }
 }

@@ -1,53 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
-class ApplicationApi
-{
-    /**
-     * @var Application
-     */
-    private $application;
+use RuntimeException;
 
-    /**
-     * @param Application $application
-     */
+final class ApplicationApi
+{
+    private Application $application;
+
     public function __construct(Application $application)
     {
         $this->application = $application;
     }
 
-    /**
-     * @param mixed $s
-     *
-     * @return string
-     */
-    public function e($s)
+    public function e(mixed $s): string
     {
-        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
     }
 
-    /**
-     * @param string $action
-     * @param array  $params
-     *
-     * @return string
-     */
-    public function url($action, array $params = [])
+    public function url(string $action, array $params = []): string
     {
         return $this->application->url($action, $params);
     }
 
     /**
-     * @param string $resourceKey
-     * @param object $scope
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function doInclude($resourceKey, $scope)
+    public function doInclude(string $resourceKey, object $scope): void
     {
         $resource = $this->application->getViewScriptManager()->getScript($resourceKey);
-        $bound    = $resource->bindTo($scope);
+        $bound = $resource->bindTo($scope);
 
         $bound();
     }

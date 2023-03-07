@@ -1,59 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\Tests;
 
 use mermshaus\fine\ViewScriptManager;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
- *
+ * @covers \mermshaus\fine\ViewScriptManager
  */
-class ViewScriptManagerTest extends PHPUnit_Framework_TestCase
+class ViewScriptManagerTest extends TestCase
 {
-    /**
-     *
-     */
-    public function testCreateInstance()
+    public function testCreateInstance(): void
     {
         $obj = new ViewScriptManager();
 
-        $this->assertEquals(true, $obj instanceof ViewScriptManager);
+        static::assertInstanceOf(ViewScriptManager::class, $obj);
     }
 
-    /**
-     *
-     */
-    public function testAddScript()
+    public function testGetScript(): void
     {
         $obj = new ViewScriptManager();
 
-        $obj->addScript('test', function () {});
-    }
-
-    /**
-     *
-     */
-    public function testGetScript()
-    {
-        $obj = new ViewScriptManager();
-
-        $obj->addScript('test', function () { return 'foo'; });
+        $obj->addScript('test', function () {
+            return 'foo';
+        });
 
         $closure = $obj->getScript('test');
 
         $this->assertSame('foo', $closure());
     }
 
-    /**
-     *
-     */
-    public function testGetScriptThrowsException()
+    public function testGetScriptThrowsException(): void
     {
-        $this->setExpectedException('\\Exception', 'Script not found: "bogus"');
+        $this->expectExceptionMessage('Script not found: "bogus"');
 
         $obj = new ViewScriptManager();
 
-        $obj->addScript('test', function () { return 'foo'; });
+        $obj->addScript('test', function () {
+            return 'foo';
+        });
 
         $obj->getScript('bogus');
     }

@@ -1,3 +1,7 @@
 parameters:
+    level: 6
+    paths:
+        - src
+        - tests
     ignoreErrors:
         - '#Constant __COMPILER_HALT_OFFSET__ not found.#'

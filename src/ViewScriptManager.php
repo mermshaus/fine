@@ -1,33 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
-class ViewScriptManager
-{
-    /**
-     * @var array
-     */
-    private $scripts = [];
+use Closure;
+use RuntimeException;
 
-    /**
-     * @param string   $key
-     * @param \Closure $content
-     */
-    public function addScript($key, \Closure $content)
+final class ViewScriptManager
+{
+    private array $scripts = [];
+
+    public function addScript(string $key, Closure $content): void
     {
         $this->scripts[$key] = $content;
     }
 
     /**
-     * @param string $key
-     *
-     * @return \Closure
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function getScript($key)
+    public function getScript(string $key): Closure
     {
         if (!isset($this->scripts[$key])) {
-            throw new \RuntimeException(sprintf('Script not found: "%s"', $key));
+            throw new RuntimeException(sprintf('Script not found: "%s"', $key));
         }
 
         return $this->scripts[$key];

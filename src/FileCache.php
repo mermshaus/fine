@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
-class FileCache
-{
-    /**
-     * @var string
-     */
-    private $cacheDir;
+use GdImage;
+use LogicException;
+use RuntimeException;
+use SplFileObject;
 
-    /**
-     * @param string $cacheDir
-     */
-    public function __construct($cacheDir)
+final class FileCache
+{
+    private string $cacheDir;
+
+    public function __construct(string $cacheDir)
     {
         $this->cacheDir = $cacheDir;
 
@@ -21,22 +22,12 @@ class FileCache
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function isWritable()
+    public function isWritable(): bool
     {
         return is_writable($this->cacheDir);
     }
 
-    /**
-     * @param string   $key
-     * @param resource $imageResource
-     * @param int      $quality
-     *
-     * @return boolean
-     */
-    public function saveFromJpegImage($key, $imageResource, $quality)
+    public function saveFromJpegImage(string $key, GdImage $imageResource, int $quality): bool
     {
         if (!is_writable($this->cacheDir)) {
             return false;
@@ -48,15 +39,12 @@ class FileCache
     }
 
     /**
-     * Delete files in cache that aren't managed by the application (e. g.
-     * because of deprecated prefixes)
+     * Delete files in cache that aren't managed by the application (e.g.
+     * because of deprecated prefixes).
      *
-     * @param array $managedCachePrefixes
-     *
-     * @return int
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function clearUnmanagedItems(array $managedCachePrefixes)
+    public function clearUnmanagedItems(array $managedCachePrefixes): int
     {
         $deleteCounter = 0;
 
@@ -79,7 +67,7 @@ class FileCache
             if (!in_array($parts[0], $managedCachePrefixes, true)) {
                 $this->deleteItem($pathinfo['basename']);
                 $deleteCounter++;
-                continue;
+                // continue;
             }
         }
 
@@ -87,14 +75,9 @@ class FileCache
     }
 
     /**
-     *
-     * @param string $prefix
-     * @param array  $keysHashMap
-     *
-     * @return int
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function clearItemsNotInList($prefix, array $keysHashMap)
+    public function clearItemsNotInList(string $prefix, array $keysHashMap): int
     {
         $deleteCounter = 0;
 
@@ -103,7 +86,7 @@ class FileCache
 
             if (!isset($keysHashMap[$pathinfo['basename']])) {
                 if ($pathinfo['extension'] !== 'cache') {
-                    throw new \RuntimeException('Found cache file with invalid file extension');
+                    throw new RuntimeException('Found cache file with invalid file extension');
                 }
                 $this->deleteItem($pathinfo['basename']);
                 $deleteCounter++;
@@ -114,14 +97,14 @@ class FileCache
     }
 
     /**
-     * @param string $key
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function deleteItem($key)
+    public function deleteItem(string $key): void
     {
         if (!$this->hasItem($key)) {
-            throw new \RuntimeException(sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key));
+            throw new RuntimeException(
+                sprintf('Trying to delete cache item "%s", but no such item exists in cache', $key),
+            );
         }
 
         $filepath = $this->cacheDir . '/' . $key;
@@ -129,25 +112,17 @@ class FileCache
         unlink($filepath);
     }
 
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function hasItem($key)
+    public function hasItem(string $key): bool
     {
         return file_exists($this->cacheDir . '/' . $key);
     }
 
     /**
-     * @param string $key
-     *
-     * @return FileCacheItem
-     * @throws \RuntimeException
-     * @throws \LogicException
+     * @throws LogicException
+     * @throws RuntimeException
      */
-    public function getItem($key)
+    public function getItem(string $key): FileCacheItem
     {
-        return new FileCacheItem($key, new \SplFileObject($this->cacheDir . '/' . $key));
+        return new FileCacheItem($key, new SplFileObject($this->cacheDir . '/' . $key));
     }
 }

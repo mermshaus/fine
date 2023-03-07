@@ -1,147 +1,89 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
 
 final class ViewModelAlbum extends AbstractViewModel
 {
-    /**
-     * @var string
-     */
-    private $album;
+    private string $album;
 
-    /**
-     * @var int
-     */
-    private $activePage;
+    private int $activePage;
 
-    /**
-     * @var array
-     */
-    private $images;
+    private array $images;
 
-    /**
-     * @var int
-     */
-    private $imagesCount;
+    private int $imagesCount;
 
-    /**
-     * @var int
-     */
-    private $pagesCount;
+    private int $pagesCount;
 
-    /**
-     * @var int
-     */
-    private $previousPageNumber;
+    private int $previousPageNumber;
 
-    /**
-     * @var int
-     */
-    private $nextPageNumber;
+    private int $nextPageNumber;
 
-    /**
-     * @var bool
-     */
-    private $isInSingleAlbumMode;
+    private bool $isInSingleAlbumMode;
 
-    /**
-     * @param ApplicationApi $api
-     * @param string         $script
-     * @param string         $album
-     * @param int            $activePage
-     * @param array          $images
-     * @param int            $imagesCount
-     * @param int            $pagesCount
-     * @param int            $previousPageNumber
-     * @param int            $nextPageNumber
-     * @param bool           $isInSingleAlbumMode
-     */
     public function __construct(
         ApplicationApi $api,
-        $script,
-        $album,
-        $activePage,
+        string $script,
+        string $album,
+        int $activePage,
         array $images,
-        $imagesCount,
-        $pagesCount,
-        $previousPageNumber,
-        $nextPageNumber,
-        $isInSingleAlbumMode
+        int $imagesCount,
+        int $pagesCount,
+        int $previousPageNumber,
+        int $nextPageNumber,
+        bool $isInSingleAlbumMode
     ) {
         parent::__construct($api, $script);
 
-        $this->album               = $album;
-        $this->activePage          = $activePage;
-        $this->images              = $images;
-        $this->imagesCount         = $imagesCount;
-        $this->pagesCount          = $pagesCount;
-        $this->previousPageNumber  = $previousPageNumber;
-        $this->nextPageNumber      = $nextPageNumber;
+        $this->album = $album;
+        $this->activePage = $activePage;
+        $this->images = $images;
+        $this->imagesCount = $imagesCount;
+        $this->pagesCount = $pagesCount;
+        $this->previousPageNumber = $previousPageNumber;
+        $this->nextPageNumber = $nextPageNumber;
         $this->isInSingleAlbumMode = $isInSingleAlbumMode;
     }
 
-    /**
-     * @return string
-     */
-    public function getAlbum()
+    public function getAlbum(): string
     {
         return $this->album;
     }
 
-    /**
-     * @return int
-     */
-    public function getActivePage()
+    public function getActivePage(): int
     {
         return $this->activePage;
     }
 
-    /**
-     * @return array
-     */
-    public function getImages()
+    public function getImages(): array
     {
         return $this->images;
     }
 
-    /**
-     * @return int
-     */
-    public function getImagesCount()
+    public function getImagesCount(): int
     {
         return $this->imagesCount;
     }
 
-    /**
-     * @return int
-     */
-    public function getPagesCount()
+    public function getPagesCount(): int
     {
         return $this->pagesCount;
     }
 
-    /**
-     * @return int
-     */
-    public function getPreviousPageNumber()
+    public function getPreviousPageNumber(): int
     {
         return $this->previousPageNumber;
     }
 
-    /**
-     * @return int
-     */
-    public function getNextPageNumber()
+    public function getNextPageNumber(): int
     {
         return $this->nextPageNumber;
     }
 
-    /**
-     * @return bool
-     */
-    public function getIsInSingleAlbumMode()
+    public function getIsInSingleAlbumMode(): bool
     {
         return $this->isInSingleAlbumMode;
     }

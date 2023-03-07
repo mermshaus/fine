@@ -103,6 +103,8 @@ final class Generator
     {
         $data = file_get_contents($file);
 
+        $data = str_replace("declare(strict_types=1);\n\n", '', $data);
+
         if (strpos($data, '<?php') !== 0) {
             throw new \RuntimeException(sprintf('File "%s" does not begin with \'<?php\'', $file));
         }
@@ -261,6 +263,8 @@ call_user_func(function () {
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+ 
+declare(strict_types=1);
 
 
 EOT

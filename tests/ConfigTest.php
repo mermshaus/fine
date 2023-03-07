@@ -1,30 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\Tests;
 
 use mermshaus\fine\Config;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ConfigTest extends PHPUnit_Framework_TestCase
+/**
+ * @covers \mermshaus\fine\Config
+ */
+class ConfigTest extends TestCase
 {
-    /**
-     * @throws \PHPUnit_Framework_Exception
-     */
-    public function testCreateInstance()
+    public function testCreateInstance(): void
     {
         $obj = new Config();
 
-        static::assertInstanceOf('\\mermshaus\\fine\\Config', $obj);
-    }
-
-    /**
-     *
-     */
-    public function testDefaultValues()
-    {
-        $obj = new Config();
-
-        #static::assertSame(realpath(__DIR__ . '/../src'), realpath($obj->albumPath));
-        #static::assertSame(realpath(__DIR__ . '/../src/.fine'), realpath($obj->cacheDir));
+        static::assertInstanceOf(Config::class, $obj);
     }
 }

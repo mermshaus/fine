@@ -1,62 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
 
 use mermshaus\fine\ApplicationApi;
 
 final class ViewModelLayout extends AbstractViewModel
 {
-    /**
-     * @var AbstractViewModel
-     */
-    private $contentView;
+    private AbstractViewModel $contentView;
 
-    /**
-     * @var string
-     */
-    private $htmlId;
+    private string $htmlId;
 
-    /**
-     * @var string
-     */
-    private $appVersion;
+    private string $appVersion;
 
-    /**
-     * @param ApplicationApi    $api
-     * @param string            $script
-     * @param AbstractViewModel $contentView
-     * @param string            $htmlId
-     * @param string            $appVersion
-     */
-    public function __construct(ApplicationApi $api, $script, AbstractViewModel $contentView, $htmlId, $appVersion)
-    {
+    public function __construct(
+        ApplicationApi $api,
+        string $script,
+        AbstractViewModel $contentView,
+        string $htmlId,
+        string $appVersion
+    ) {
         parent::__construct($api, $script);
 
         $this->contentView = $contentView;
-        $this->htmlId      = $htmlId;
-        $this->appVersion  = $appVersion;
+        $this->htmlId = $htmlId;
+        $this->appVersion = $appVersion;
     }
 
-    /**
-     * @return AbstractViewModel
-     */
-    public function getContentView()
+    public function getContentView(): AbstractViewModel
     {
         return $this->contentView;
     }
 
-    /**
-     * @return string
-     */
-    public function getHtmlId()
+    public function getHtmlId(): string
     {
         return $this->htmlId;
     }
 
-    /**
-     * @return string
-     */
-    public function getAppVersion()
+    public function getAppVersion(): string
     {
         return $this->appVersion;
     }

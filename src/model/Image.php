@@ -1,51 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine\model;
+
+use DateTime;
+use DateTimeZone;
 
 final class Image
 {
-    private $path;
+    private string $path;
 
-    private $basename;
+    private string $basename;
 
-    private $isLoaded = false;
+    private bool $isLoaded = false;
 
-    private $fileSize;
-    private $creationDate;
-    private $width;
-    private $height;
-    private $filemdate;
-    private $sortDate;
+    private ?int $fileSize = null;
+    private ?DateTime $creationDate = null;
+    private int $width;
+    private int $height;
+    private DateTime $filemdate;
+    private DateTime $sortDate;
 
-    /**
-     * @param string $path
-     */
-    public function __construct($path)
+    public function __construct(string $path)
     {
-        $this->path     = $path;
+        $this->path = $path;
         $this->basename = pathinfo($this->path, PATHINFO_BASENAME);
     }
 
-    private function load()
+    private function load(): void
     {
-        $this->fileSize     = filesize($this->path);
+        $this->fileSize = filesize($this->path);
         $this->creationDate = null;
-        $this->filemdate    = \DateTime::createFromFormat('U', (string) filemtime($this->path));
+        $this->filemdate = DateTime::createFromFormat('U', (string) filemtime($this->path));
 
-        list($this->width, $this->height) = getimagesize($this->path);
+        [$this->width, $this->height] = getimagesize($this->path);
 
-        set_error_handler(function () {
+        set_error_handler(function (int $errno, string $errstr): bool {
             // Discard EXIF warnings
+            return true;
         });
-        $exifs = exif_read_data($this->path, 'IFD0', true, false);
+        $exifs = exif_read_data($this->path, 'IFD0', true);
         restore_error_handler();
 
         if ($exifs !== false && isset($exifs['IFD0']['DateTime'])) {
-            $this->creationDate = \DateTime::createFromFormat(
+            $this->creationDate = DateTime::createFromFormat(
                 'Y:m:d H:i:s',
                 $exifs['IFD0']['DateTime'],
                 // @todo Try to determine correct TZ
-                new \DateTimeZone('UTC')
+                new DateTimeZone('UTC'),
             );
 
             if ($this->creationDate === false) {
@@ -61,21 +64,15 @@ final class Image
 
         $this->isLoaded = true;
 
-        #$GLOBALS['loadCalls']++;
+        // $GLOBALS['loadCalls']++;
     }
 
-    /**
-     * @return string
-     */
-    public function getBasename()
+    public function getBasename(): string
     {
         return $this->basename;
     }
 
-    /**
-     * @return int
-     */
-    public function getFileSize()
+    public function getFileSize(): int
     {
         if ($this->fileSize === null) {
             $this->fileSize = filesize($this->path);
@@ -84,10 +81,7 @@ final class Image
         return $this->fileSize;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getCreationDate()
+    public function getCreationDate(): DateTime
     {
         if (!$this->isLoaded) {
             $this->load();
@@ -96,10 +90,7 @@ final class Image
         return $this->creationDate;
     }
 
-    /**
-     * @return int
-     */
-    public function getWidth()
+    public function getWidth(): int
     {
         if (!$this->isLoaded) {
             $this->load();
@@ -108,10 +99,7 @@ final class Image
         return $this->width;
     }
 
-    /**
-     * @return int
-     */
-    public function getHeight()
+    public function getHeight(): int
     {
         if (!$this->isLoaded) {
             $this->load();
@@ -120,10 +108,7 @@ final class Image
         return $this->height;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getFilemdate()
+    public function getFilemdate(): DateTime
     {
         if (!$this->isLoaded) {
             $this->load();
@@ -132,10 +117,7 @@ final class Image
         return $this->filemdate;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getSortDate()
+    public function getSortDate(): DateTime
     {
         if (!$this->isLoaded) {
             $this->load();

@@ -1,16 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" stopOnError="false" stopOnFailure="false" stopOnIncomplete="false" stopOnSkipped="false" bootstrap="tests/bootstrap.php">
-    <testsuites>
-        <testsuite name="all">
-            <directory suffix="Test.php">tests/</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
-    <logging>
-        <log type="coverage-html" target="build/coverage" charset="UTF-8" yui="true" highlight="true"/>
-    </logging>
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+  bootstrap="vendor/autoload.php"
+  cacheDirectory=".phpunit.cache"
+  executionOrder="depends,defects"
+  requireCoverageMetadata="true"
+  beStrictAboutCoverageMetadata="true"
+  beStrictAboutOutputDuringTests="true"
+  failOnRisky="true"
+  failOnWarning="true"
+>
+  <testsuites>
+    <testsuite name="default">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+
+  <coverage>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </coverage>
 </phpunit>

@@ -2,27 +2,81 @@
 
 /** @var $this \mermshaus\fine\model\ViewModelIndex */
 
+$directories = array_filter(
+    $this->getElements(),
+    function ($element) {
+        return $element['type'] === 'directory';
+    }
+);
+
+$images = array_filter(
+    $this->getElements(),
+    function ($element) {
+        return $element['type'] === 'image';
+    }
+);
+
 ?>
 <div class="ui-content">
 
-    <?php if (count($this->getAlbums()) === 0): ?>
+    <?php if (count($this->getElements()) === 0): ?>
         <p>No albums found. Please check your config.</p>
     <?php else: ?>
-        <ul class="cf">
-            <?php foreach ($this->getAlbums() as $album): ?>
-                <?php
-                $url      = $this->url('album', ['album' => $album]);
-                $thumbUrl = $this->url('image', ['album' => $album, 'filename' => $this->getCoverImages()[$album]->getBasename(), 'element' => 'thumb']);
-                ?>
-                <li>
-                    <a href="<?= $this->e($url) ?>">
-                        <img src="<?= $this->e($thumbUrl) ?>"
-                             alt="<?= $this->e('Preview image for album "' . $album . '"') ?>">
-                        <span><?= $this->e($album) ?></span>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+
+        <?php if (count($this->getNavigation()) > 0): ?>
+
+            <ul class="cf breadcrumbs">
+                <?php foreach ($this->getNavigation() as $navigationEntry): ?>
+                    <li>
+                        <a href="<?= $this->e($navigationEntry['url']) ?>"><?= $this->e($navigationEntry['title']) ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <h1><?= $this->e($this->getPageTitle()) ?></h1>
+
+            <hr>
+
+        <?php endif; ?>
+
+        <?php if (count($directories) > 0): ?>
+
+            <ul class="cf">
+                <?php foreach ($directories as $element): ?>
+                    <?php
+                    $url = $this->url('index', ['path' => $element['path']]);
+                    ?>
+                    <li style="width:120px; height: 40px;">
+                        <a href="<?= $this->e($url) ?>">
+                            <?= $this->e($element['name']) ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <hr>
+
+        <?php endif; ?>
+
+        <?php if (count($images) > 0): ?>
+
+            <ul class="cf">
+                <?php foreach ($images as $element): ?>
+                    <?php
+                    $url      = $this->url('detail', ['path' => $element['path']]);
+                    $thumbUrl = $this->url('image', ['path' => $element['path'], 'element' => 'thumb']);
+                    ?>
+                    <li>
+                        <a href="<?= $this->e($url) ?>">
+                            <img src="<?= $this->e($thumbUrl) ?>"
+                                 alt="<?= $this->e('Preview image for album "' . $element . '"') ?>">
+                            <span><?= $this->e($element['name']) ?></span>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
     <?php endif; ?>
 
 </div>

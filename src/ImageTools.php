@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace mermshaus\fine;
 
-class ImageTools
+use GdImage;
+use RuntimeException;
+
+final class ImageTools
 {
     /**
-     * @param string $imagePath
-     *
-     * @return resource
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function loadImage($imagePath)
+    public function loadImage(string $imagePath): GdImage
     {
         $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
 
@@ -20,33 +22,34 @@ class ImageTools
             'gif' => ['gif'],
             'jpg' => ['jpg', 'jpeg'],
             'png' => ['png'],
+            'webp' => ['webp'],
         ];
 
         if (in_array($extension, $extensions['jpg'], true)) {
             $image = imagecreatefromjpeg($imagePath);
-            $image = $this->adjustRotation($imagePath, $image);
         } elseif (in_array($extension, $extensions['png'], true)) {
             $image = imagecreatefrompng($imagePath);
         } elseif (in_array($extension, $extensions['gif'], true)) {
             $image = imagecreatefromgif($imagePath);
+        } elseif (in_array($extension, $extensions['webp'], true)) {
+            $image = imagecreatefromwebp($imagePath);
         }
 
-        if (!is_resource($image)) {
-            throw new \RuntimeException(sprintf('Couldn\'t open image in "%s"', $imagePath));
+        if (!$image instanceof GdImage) {
+            throw new RuntimeException(sprintf('Couldn\'t open image in "%s"', $imagePath));
+        }
+
+        if (in_array($extension, $extensions['jpg'], true)) {
+            $image = $this->adjustRotation($imagePath, $image);
         }
 
         return $image;
     }
 
     /**
-     * Only works for JPEG images (?)
-     *
-     * @param string   $imagePath
-     * @param resource $image
-     *
-     * @return resource
+     * Only works for JPEG images (?).
      */
-    private function adjustRotation($imagePath, $image)
+    private function adjustRotation(string $imagePath, GdImage $image): GdImage
     {
         $exif = @exif_read_data($imagePath);
 
@@ -74,38 +77,49 @@ class ImageTools
         return $image;
     }
 
-    /**
-     * @param resource $image
-     * @param int      $width
-     * @param int      $height
-     *
-     * @return resource
-     */
-    public function createThumb($image, $width, $height)
+    public function createThumb(GdImage $image, int $width, int $height): GdImage
     {
-        $imageWidth  = imagesx($image);
+        $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
 
-        $boxWidth  = $width;
+        $boxWidth = $width;
         $boxHeight = $height;
 
         $sfw = $imageWidth / $boxWidth;
         $sfh = $imageHeight / $boxHeight;
 
         if ($sfw < $sfh) {
-            $tmpBoxWidth  = $boxWidth * $sfw;
-            $tmpBoxHeight = $boxHeight * $sfw;
+            $tmpBoxWidth = (int) round($boxWidth * $sfw);
+            $tmpBoxHeight = (int) round($boxHeight * $sfw);
         } else {
-            $tmpBoxWidth  = $boxWidth * $sfh;
-            $tmpBoxHeight = $boxHeight * $sfh;
+            $tmpBoxWidth = (int) round($boxWidth * $sfh);
+            $tmpBoxHeight = (int) round($boxHeight * $sfh);
         }
 
         $dstim = imagecreatetruecolor($tmpBoxWidth, $tmpBoxHeight);
 
         if ($sfw < $sfh) {
-            imagecopy($dstim, $image, 0, 0, 0, ($imageHeight - $tmpBoxHeight) / 2, $tmpBoxWidth, $tmpBoxHeight);
+            imagecopy(
+                $dstim,
+                $image,
+                0,
+                0,
+                0,
+                (int) round(($imageHeight - $tmpBoxHeight) / 2),
+                $tmpBoxWidth,
+                $tmpBoxHeight,
+            );
         } else {
-            imagecopy($dstim, $image, 0, 0, ($imageWidth - $tmpBoxWidth) / 2, 0, $tmpBoxWidth, $tmpBoxHeight);
+            imagecopy(
+                $dstim,
+                $image,
+                0,
+                0,
+                (int) round(($imageWidth - $tmpBoxWidth) / 2),
+                0,
+                $tmpBoxWidth,
+                $tmpBoxHeight,
+            );
         }
 
         $dstim2 = imagecreatetruecolor($boxWidth, $boxHeight);
@@ -115,17 +129,9 @@ class ImageTools
         return $dstim2;
     }
 
-    /**
-     * @param resource $image
-     * @param int      $maxWidth
-     * @param int      $maxHeight
-     * @param bool     $enlarge
-     *
-     * @return resource
-     */
-    public function scale($image, $maxWidth, $maxHeight, $enlarge = false)
+    public function scale(GdImage $image, int $maxWidth, int $maxHeight, bool $enlarge = false): GdImage
     {
-        $imageWidth  = imagesx($image);
+        $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
 
         if ($enlarge === false && $imageWidth <= $maxWidth && $imageHeight <= $maxHeight) {
@@ -134,7 +140,7 @@ class ImageTools
 
         $f = max($imageWidth / $maxWidth, $imageHeight / $maxHeight);
 
-        $tmpBoxWidth  = (int) round($imageWidth / $f);
+        $tmpBoxWidth = (int) round($imageWidth / $f);
         $tmpBoxHeight = (int) round($imageHeight / $f);
 
         if ($tmpBoxWidth > $maxWidth) {

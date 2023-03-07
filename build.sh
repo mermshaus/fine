@@ -21,7 +21,7 @@ mkdir -p ${build_dir}
 php -f ./generate > ${build_dir}/index.php
 php -l ${build_dir}/index.php 1>/dev/null
 
-vendor/bin/phpunit --no-coverage
+vendor/bin/phpunit
 
 cp README.md ${build_dir}
 
