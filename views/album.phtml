@@ -4,11 +4,9 @@
 
 ?>
 
-<?php if (!$this->getIsInSingleAlbumMode() || $this->getPagesCount() > 1): ?>
+<?php if ($this->getPagesCount() > 1): ?>
 <div class="ui-controls">
-    <?php if (!$this->getIsInSingleAlbumMode()): ?>
     <a data-action="navigation-up" href="<?=$this->e($this->url('index'))?>">← <?=$this->e($this->getAlbum())?></a>
-    <?php endif; ?>
 
         <?php if ($this->getImagesCount() > 1 || true) : ?>
         <a data-action="navigation-random" id="navigation-random" href="<?=$this->e($this->url('random', array('album' => $this->getAlbum())))?>">rand</a>

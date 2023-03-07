@@ -66,11 +66,6 @@ final class Application
         exit;
     }
 
-    private function isInSingleAlbumMode(): bool
-    {
-        return $this->config->singleAlbumMode;
-    }
-
     public function url(string $action, array $params = []): string
     {
         if (
@@ -281,7 +276,7 @@ final class Application
 
         $info = [];
 
-        $albums = $this->isInSingleAlbumMode() ? [''] : $this->getAlbums();
+        $albums = $this->getAlbums();
 
         $first = true;
 
@@ -428,10 +423,6 @@ final class Application
      */
     private function assertValidAlbum(string $album): void
     {
-        if ($album === '' && $this->isInSingleAlbumMode()) {
-            return;
-        }
-
         if (!in_array($album, $this->getAlbums(), true)) {
             throw new RuntimeException(sprintf('Unknown album "%s"', $album));
         }
@@ -612,7 +603,6 @@ final class Application
             $pagesCount,
             $previousPageNumber,
             $nextPageNumber,
-            $this->isInSingleAlbumMode(),
         );
     }
 

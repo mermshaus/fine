@@ -22,8 +22,6 @@ final class ViewModelAlbum extends AbstractViewModel
 
     private int $nextPageNumber;
 
-    private bool $isInSingleAlbumMode;
-
     public function __construct(
         ApplicationApi $api,
         string $script,
@@ -33,8 +31,7 @@ final class ViewModelAlbum extends AbstractViewModel
         int $imagesCount,
         int $pagesCount,
         int $previousPageNumber,
-        int $nextPageNumber,
-        bool $isInSingleAlbumMode
+        int $nextPageNumber
     ) {
         parent::__construct($api, $script);
 
@@ -45,7 +42,6 @@ final class ViewModelAlbum extends AbstractViewModel
         $this->pagesCount = $pagesCount;
         $this->previousPageNumber = $previousPageNumber;
         $this->nextPageNumber = $nextPageNumber;
-        $this->isInSingleAlbumMode = $isInSingleAlbumMode;
     }
 
     public function getAlbum(): string
@@ -81,10 +77,5 @@ final class ViewModelAlbum extends AbstractViewModel
     public function getNextPageNumber(): int
     {
         return $this->nextPageNumber;
-    }
-
-    public function getIsInSingleAlbumMode(): bool
-    {
-        return $this->isInSingleAlbumMode;
     }
 }

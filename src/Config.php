@@ -9,8 +9,6 @@ final class Config
     public string $albumPath;
     public string $cacheDir;
 
-    public bool $singleAlbumMode;
-
     public int $thumbWidth = 240;
     public int $thumbHeight = 240;
     public int $thumbQuality = 75;
@@ -24,11 +22,9 @@ final class Config
     public function __construct()
     {
         $this->albumPath = getcwd();
-        $this->singleAlbumMode = true;
 
         if (is_dir($this->albumPath . '/albums')) {
             $this->albumPath .= '/albums';
-            $this->singleAlbumMode = false;
         }
 
         $this->cacheDir = $this->albumPath . '/.fine';
