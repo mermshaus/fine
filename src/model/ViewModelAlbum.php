@@ -12,6 +12,9 @@ final class ViewModelAlbum extends AbstractViewModel
 
     private int $activePage;
 
+    /**
+     * @var array<Image>
+     */
     private array $images;
 
     private int $imagesCount;
@@ -22,6 +25,9 @@ final class ViewModelAlbum extends AbstractViewModel
 
     private int $nextPageNumber;
 
+    /**
+     * @param array<Image> $images
+     */
     public function __construct(
         ApplicationApi $api,
         string $script,
@@ -54,6 +60,9 @@ final class ViewModelAlbum extends AbstractViewModel
         return $this->activePage;
     }
 
+    /**
+     * @return array<Image>
+     */
     public function getImages(): array
     {
         return $this->images;

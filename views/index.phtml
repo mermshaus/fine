@@ -1,18 +1,18 @@
 <?php
 
-/** @var $this \mermshaus\fine\model\ViewModelIndex */
+/** @var \mermshaus\fine\model\ViewModelIndex $this */
 
 $directories = array_filter(
     $this->getElements(),
     function ($element) {
-        return $element['type'] === 'directory';
+        return $element->type === 'directory';
     }
 );
 
 $images = array_filter(
     $this->getElements(),
     function ($element) {
-        return $element['type'] === 'image';
+        return $element->type === 'file';
     }
 );
 
@@ -28,33 +28,29 @@ $images = array_filter(
             <ul class="cf breadcrumbs">
                 <?php foreach ($this->getNavigation() as $navigationEntry): ?>
                     <li>
-                        <a href="<?= $this->e($navigationEntry['url']) ?>"><?= $this->e($navigationEntry['title']) ?></a>
+                        <a href="<?= $this->e($navigationEntry->url) ?>"><?= $this->e($navigationEntry->title) ?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
 
             <h1><?= $this->e($this->getPageTitle()) ?></h1>
 
-            <hr>
-
         <?php endif; ?>
 
         <?php if (count($directories) > 0): ?>
 
-            <ul class="cf">
+            <ul class="cf directories">
                 <?php foreach ($directories as $element): ?>
                     <?php
-                    $url = $this->url('index', ['path' => $element['path']]);
+                    $url = $this->url('index', ['path' => $element->path]);
                     ?>
-                    <li style="width:120px; height: 40px;">
+                    <li>
                         <a href="<?= $this->e($url) ?>">
-                            <?= $this->e($element['name']) ?>
+                            <?= $this->e($element->name) ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
             </ul>
-
-            <hr>
 
         <?php endif; ?>
 
@@ -63,14 +59,14 @@ $images = array_filter(
             <ul class="cf">
                 <?php foreach ($images as $element): ?>
                     <?php
-                    $url      = $this->url('detail', ['path' => $element['path']]);
-                    $thumbUrl = $this->url('image', ['path' => $element['path'], 'element' => 'thumb']);
+                    $url      = $this->url('detail', ['path' => $element->path]);
+                    $thumbUrl = $this->url('image', ['path' => $element->path, 'element' => 'thumb']);
                     ?>
                     <li>
                         <a href="<?= $this->e($url) ?>">
                             <img src="<?= $this->e($thumbUrl) ?>"
-                                 alt="<?= $this->e('Preview image for album "' . $element . '"') ?>">
-                            <span><?= $this->e($element['name']) ?></span>
+                                 alt="<?= $this->e('Preview image for album "' . $element->name . '"') ?>">
+                            <!--<span><?= $this->e($element->name) ?></span>-->
                         </a>
                     </li>
                 <?php endforeach; ?>

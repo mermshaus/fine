@@ -15,10 +15,14 @@ final class ViewModelStatus extends AbstractViewModel
 
     private string $output;
 
+    /**
+     * @var array<DirectoryInfo>
+     */
     private array $info;
 
     /**
      * @param array<string> $prefixes
+     * @param array<DirectoryInfo> $info
      */
     public function __construct(ApplicationApi $api, string $script, array $prefixes, string $output, array $info)
     {
@@ -42,6 +46,9 @@ final class ViewModelStatus extends AbstractViewModel
         return $this->output;
     }
 
+    /**
+     * @return array<DirectoryInfo>
+     */
     public function getInfo(): array
     {
         return $this->info;

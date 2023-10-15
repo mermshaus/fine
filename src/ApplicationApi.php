@@ -8,11 +8,11 @@ use RuntimeException;
 
 final class ApplicationApi
 {
-    private Application $application;
+    private ViewScriptManager $viewScriptManager;
 
-    public function __construct(Application $application)
+    public function __construct(ViewScriptManager $viewScriptManager)
     {
-        $this->application = $application;
+        $this->viewScriptManager = $viewScriptManager;
     }
 
     public function e(mixed $s): string
@@ -22,7 +22,33 @@ final class ApplicationApi
 
     public function url(string $action, array $params = []): string
     {
-        return $this->application->url($action, $params);
+        if (
+            isset($params['album'])
+            && $params['album'] === ''
+            && in_array($action, ['album', 'detail', 'image'], true)
+        ) {
+            unset($params['album']);
+        }
+
+        $url = './';
+
+        if (basename(__FILE__) !== 'index.php') {
+            $url = basename(__FILE__);
+        }
+
+        if ($action !== 'index') {
+            $params = array_merge(['action' => $action], $params);
+        }
+
+        if ($action === 'index' && isset($params['path']) && $params['path'] === '') {
+            unset($params['path']);
+        }
+
+        if (count($params) > 0) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return $url;
     }
 
     /**
@@ -30,7 +56,7 @@ final class ApplicationApi
      */
     public function doInclude(string $resourceKey, object $scope): void
     {
-        $resource = $this->application->getViewScriptManager()->getScript($resourceKey);
+        $resource = $this->viewScriptManager->getScript($resourceKey);
         $bound = $resource->bindTo($scope);
 
         $bound();

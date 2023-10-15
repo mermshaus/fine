@@ -6,6 +6,7 @@ namespace mermshaus\fine;
 
 use GdImage;
 use LogicException;
+use mermshaus\fine\model\FileCacheItem;
 use RuntimeException;
 use SplFileObject;
 

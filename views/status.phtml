@@ -18,29 +18,6 @@ $formatFileSize = function ($s) {
     return '&nbsp;';
 };
 
-$sums = array(
-    'count' => 0,
-    'size'  => 0,
-    'cache' => array()
-);
-
-foreach ($this->getPrefixes() as $prefix) {
-    $sums['cache'][$prefix] = array(
-        'count' => 0,
-        'size'  => 0
-    );
-}
-
-foreach ($this->getInfo() as $data) {
-    $sums['count'] += $data['count'];
-    $sums['size']  += $data['size'];
-
-    foreach ($this->getPrefixes() as $prefix) {
-        $sums['cache'][$prefix]['count'] += $data['cache'][$prefix]['count'];
-        $sums['cache'][$prefix]['size']  += $data['cache'][$prefix]['size'];
-    }
-}
-
 ?>
 
 <div class="ui-controls">
@@ -53,9 +30,11 @@ foreach ($this->getInfo() as $data) {
 
 <table>
     <tr>
-        <th rowspan="3">Album</th>
-        <th rowspan="3">Images</th>
-        <th rowspan="3">size</th>
+        <th rowspan="3">Basename</th>
+        <th rowspan="3">Path</th>
+        <th rowspan="3">Directories</th>
+        <th rowspan="3">Files</th>
+        <th rowspan="3">Size</th>
         <th colspan="<?=(count($this->getPrefixes()) * 2)?>">Cache</th>
     </tr>
     <tr>
@@ -65,12 +44,25 @@ foreach ($this->getInfo() as $data) {
     </tr>
     <tr>
         <?php foreach ($this->getPrefixes() as $prefix): ?>
-            <th>count</th>
-            <th>size</th>
+            <th>Count</th>
+            <th>Size</th>
         <?php endforeach; ?>
     </tr>
 
-<?php foreach ($this->getInfo() as $album => $data): ?>
+    <?php foreach ($this->getInfo() as $info): ?>
+
+    <tr>
+        <td><a href="<?=$this->e($this->url('index', ['path' => $info->path]))?>"><?=$this->e($info->basename)?></a></td>
+        <td><?=$this->e($info->path)?></td>
+        <td><?=$info->directoryCount > 0 ? $this->e($info->directoryCount) : '&nbsp;'?></td>
+        <td><?=$this->e($info->fileCount)?></td>
+        <td><?=$this->e($formatFileSize($info->size))?></td>
+    </tr>
+
+    <?php endforeach; ?>
+
+    <?php /*
+<?php foreach ($this->getInfo() as $data): ?>
 
 <tr>
     <td><a href="<?=$this->e($this->url('album', array('album' => $album)))?>"><?=$this->e(($album !== '') ? $album : 'link')?></a></td>
@@ -93,6 +85,8 @@ foreach ($this->getInfo() as $data) {
         <td class="text-right"><?=$formatFileSize($sums['cache'][$prefix]['size'])?></td>
     <?php endforeach; ?>
 </tr>
+
+ */ ?>
 
 </table>
 

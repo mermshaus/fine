@@ -83,12 +83,11 @@ th, td {
 
 #page-index ul li {
     float: left;
-    width: 180px;
+    /*width: 180px;*/
 }
 
 #page-index ul li a {
     display: block;
-    border: 1px solid black;
     overflow: hidden;
     position: relative;
 }
@@ -110,6 +109,18 @@ th, td {
     right: 0;
 }
 
+
+/* Breadcrumbs */
+
+#page-index .breadcrumbs a {
+    padding: 20px 50px;
+}
+
+/* Directories */
+
+#page-index .directories a {
+    padding: 20px 50px;
+}
 
 
 /* page-album */
@@ -329,12 +340,13 @@ th, td {
     clear: both;
     padding-top: 50px;
     text-align: center;
-    font-size: small;
 }
 
 #fine-logo .fine-logo-title {
     font-family: Georgia, serif;
     font-style: italic;
+    color: #333;
+    font-size: xxx-large;
 }
 
 #fine-logo .fine-logo-title a {

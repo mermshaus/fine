@@ -14,6 +14,9 @@ final class ViewModelDetail extends AbstractViewModel
 
     private string $imageUrl;
 
+    /**
+     * @var array<Image>
+     */
     private array $images;
 
     private ?Image $image;
@@ -26,6 +29,9 @@ final class ViewModelDetail extends AbstractViewModel
 
     private string $filename;
 
+    /**
+     * @param array<Image> $images
+     */
     public function __construct(
         ApplicationApi $api,
         string $script,
@@ -67,6 +73,9 @@ final class ViewModelDetail extends AbstractViewModel
         return $this->imageUrl;
     }
 
+    /**
+     * @return array<Image>
+     */
     public function getImages(): array
     {
         return $this->images;
